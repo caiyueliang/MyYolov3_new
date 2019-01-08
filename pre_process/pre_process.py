@@ -52,7 +52,7 @@ def data_pre_process(root_path, old_label_file, output_label_file):
             elif i % 5 == 4:
                 # 写标签到（output_label_path, label_path）
                 print save_str
-                write_data(os.path.join(output_label_path, label_path), save_str + '\n', 'a+')
+                write_data(os.path.join(root_path, label_path), save_str + '\n', 'a+')
                 save_str = class_index + " "
     return
 
