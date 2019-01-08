@@ -34,7 +34,7 @@ class ImageFolder(Dataset):
         # Add padding
         input_img = np.pad(img, pad, 'constant', constant_values=127.5) / 255.
         # Resize and normalize
-        input_img = resize(input_img, (*self.img_shape, 3), mode='reflect')
+        input_img = resize(input_img, (self.img_shape, self.img_shape, 3), mode='reflect')
         # Channels-first
         input_img = np.transpose(input_img, (2, 0, 1))
         # As pytorch tensor
@@ -79,7 +79,7 @@ class ListDataset(Dataset):
         input_img = np.pad(img, pad, 'constant', constant_values=128) / 255.
         padded_h, padded_w, _ = input_img.shape
         # Resize and normalize
-        input_img = resize(input_img, (*self.img_shape, 3), mode='reflect')
+        input_img = resize(input_img, (self.img_shape, self.img_shape, 3), mode='reflect')
         # Channels-first
         input_img = np.transpose(input_img, (2, 0, 1))
         # As pytorch tensor

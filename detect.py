@@ -35,7 +35,10 @@ print(opt)
 
 cuda = torch.cuda.is_available() and opt.use_cuda
 
-os.makedirs('output', exist_ok=True)
+try:
+    os.makedirs('output')
+except:
+    qwe = None
 
 # Set up model
 model = Darknet(opt.config_path, img_size=opt.img_size)
@@ -44,17 +47,17 @@ model.load_weights(opt.weights_path)
 if cuda:
     model.cuda()
 
-model.eval() # Set in evaluation mode
+model.eval()                                                    # Set in evaluation mode
 
 dataloader = DataLoader(ImageFolder(opt.image_folder, img_size=opt.img_size),
                         batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu)
 
-classes = load_classes(opt.class_path) # Extracts class labels from file
+classes = load_classes(opt.class_path)                          # Extracts class labels from file
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-imgs = []           # Stores image paths
-img_detections = [] # Stores detections for each image index
+imgs = []                                                       # Stores image paths
+img_detections = []                                             # Stores detections for each image index
 
 print ('\nPerforming object detection:')
 prev_time = time.time()
@@ -77,6 +80,8 @@ for batch_i, (img_paths, input_imgs) in enumerate(dataloader):
     # Save image and detections
     imgs.extend(img_paths)
     img_detections.extend(detections)
+
+print('images len: %d' % len(imgs))
 
 # Bounding-box colors
 cmap = plt.get_cmap('tab20b')

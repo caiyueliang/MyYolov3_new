@@ -261,16 +261,19 @@ class Darknet(nn.Module):
         for i, (module_def, module) in enumerate(zip(self.module_defs, self.module_list)):
             if module_def["type"] in ["convolutional", "upsample", "maxpool"]:
                 x = module(x)
+
             elif module_def["type"] == "route":
                 layer_i = [int(x) for x in module_def["layers"].split(",")]
                 x = torch.cat([layer_outputs[i] for i in layer_i], 1)
+
             elif module_def["type"] == "shortcut":
                 layer_i = int(module_def["from"])
                 x = layer_outputs[-1] + layer_outputs[layer_i]
+
             elif module_def["type"] == "yolo":
                 # Train phase: get loss
                 if is_training:
-                    # x, *losses = module[0](x, targets)                TODO
+                    # x, *losses = module[0](x, targets)                # TODO
                     x, losses = module[0](x, targets)
                     for name, loss in zip(self.loss_names, losses):
                         self.losses[name] += loss
