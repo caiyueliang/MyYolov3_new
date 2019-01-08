@@ -16,6 +16,7 @@ from skimage.transform import resize
 
 import sys
 
+
 class ImageFolder(Dataset):
     def __init__(self, folder_path, img_size=416):
         self.files = sorted(glob.glob('%s/*.*' % folder_path))
@@ -56,9 +57,9 @@ class ListDataset(Dataset):
 
     def __getitem__(self, index):
 
-        #---------
+        # ---------
         #  Image
-        #---------
+        # ---------
 
         img_path = self.img_files[index % len(self.img_files)].rstrip()
         img = np.array(Image.open(img_path))
@@ -85,9 +86,9 @@ class ListDataset(Dataset):
         # As pytorch tensor
         input_img = torch.from_numpy(input_img).float()
 
-        #---------
+        # ---------
         #  Label
-        #---------
+        # ---------
 
         label_path = self.label_files[index % len(self.img_files)].rstrip()
 
