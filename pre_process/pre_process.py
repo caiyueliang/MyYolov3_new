@@ -10,25 +10,20 @@ def mkdir_if_not_exist(path):
 
 
 # 大类拆分成小类
-def data_pre_process(root_path, output_path):
+def data_pre_process(root_path, old_label_file, output_label_file):
     files_list = list()
 
-    for root, dirs, files in os.walk(root_path):
-        for file in files:
-            # print(file)     #文件名
-            files_list.append(os.path.join(root, file))
+    old_label_path = os.path.join(root_path, old_label_file)
+    output_label_path = os.path.join(root_path, output_label_file)
 
-    mkdir_if_not_exist(output_path)
+    with open(old_label_path, 'r') as file:
+        label_list = file.readlines()
 
-    for file in files_list:
-        print(file)
-        name_list = file.split('/')[-1].split('_')
+    for label in label_list:
+        label = label.replace('\n', '').rstrip()
+        str_list = label.split(' ')
+        print str_list
 
-        new_dir = (name_list[0] + "_" + name_list[1]).replace(' ', '').replace('（', '(').replace('）', ')') \
-            .replace("(stopsale)", "")
-
-        mkdir_if_not_exist(os.path.join(output_path, new_dir))
-        shutil.copy(file, os.path.join(output_path, new_dir, name_list[2]))
     return
 
 
@@ -108,7 +103,7 @@ def data_pre_process(root_path, output_path):
 
 
 if __name__ == '__main__':
-    data_pre_process('../../Data/car_classifier', '../../Data/car_classifier_new')
+    data_pre_process('../../Data/yolo_data/car_detect_train/', 'car_detect_train_label.txt', 'image_path.txt')
 
     # data_pre_process_1('../../Data/car_classifier_new/', '../../Data/car_classifier_min_50/', 50)
     # data_pre_process_2('../../Data/car_classifier_min_50/', '../../Data/car_classifier_train/', 10)
