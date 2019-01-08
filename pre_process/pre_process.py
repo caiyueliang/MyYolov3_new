@@ -42,9 +42,9 @@ def data_pre_process(root_path, old_label_file, output_label_file):
         for i, temp in enumerate(str_list[2:]):
             print i, temp
             if i % 5 == 0:
-                save_str += str((float(temp) + float(str_list[2 + i]) / 2) / w) + " "
+                save_str += str((float(temp) + float(str_list[2 + 2 + i]) / 2) / w) + " "
             elif i % 5 == 1:
-                save_str += str((float(temp) + float(str_list[2 + i]) / 2) / h) + " "
+                save_str += str((float(temp) + float(str_list[2 + 2 + i]) / 2) / h) + " "
             elif i % 5 == 2:
                 save_str += str(float(temp) / w) + " "
             elif i % 5 == 3:
