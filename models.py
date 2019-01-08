@@ -389,7 +389,7 @@ def my_test(cfg_path, weights_path, image_path):
         model = model.cuda()
 
     start = time.time()
-    for i in range(10):
+    for i in range(100):
         pred = model(inp)
 
         # print(pred.data)
@@ -402,7 +402,7 @@ def my_test(cfg_path, weights_path, image_path):
         # print(output.data)
 
     end = time.time()
-    print('time: %f' % ((end - start) / 10))
+    print('time: %f' % ((end - start) / 100))
 
 
 # ================================================================================
