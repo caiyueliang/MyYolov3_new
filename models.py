@@ -21,7 +21,7 @@ def create_modules(module_defs):
     """
     Constructs module list of layer blocks from module configuration in module_defs
     """
-    hyper_params = module_defs.pop(0)                               # 定义一个变量hyperparams来存储网络的信息
+    hyper_params = module_defs.pop(0)                               # 定义一个变量hyper_params来存储网络的信息
     output_filters = [int(hyper_params["channels"])]                # 输入图片的通道数
     module_list = nn.ModuleList()                                   # 返回值nn.ModuleList。这个类相当于一个包含nn.Module对象的普通列表
     for i, module_def in enumerate(module_defs):
@@ -74,6 +74,15 @@ def create_modules(module_defs):
             filters = output_filters[int(module_def["from"])]
             modules.add_module("shortcut_%d" % i, EmptyLayer())
 
+        # [yolo]
+        # mask = 6, 7, 8
+        # anchors = 10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116, 90, 156, 198, 373, 326
+        # classes = 80
+        # num = 9
+        # jitter = .3
+        # ignore_thresh = .5
+        # truth_thresh = 1
+        # random = 1
         elif module_def["type"] == "yolo":
             anchor_idxs = [int(x) for x in module_def["mask"].split(",")]
             # Extract anchors
@@ -87,8 +96,8 @@ def create_modules(module_defs):
             modules.add_module("yolo_%d" % i, yolo_layer)
 
         # Register module list and number of output filters
-        module_list.append(modules)             # 模块保存
-        output_filters.append(filters)          # 记录每层的输出维度,构建下一层时也会作为输入
+        module_list.append(modules)                                 # 模块保存
+        output_filters.append(filters)                              # 记录每层的输出维度,构建下一层时也会作为输入
 
     return hyper_params, module_list
 
