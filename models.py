@@ -1,3 +1,4 @@
+# encoding: utf-8
 from __future__ import division
 
 import torch
@@ -20,9 +21,9 @@ def create_modules(module_defs):
     """
     Constructs module list of layer blocks from module configuration in module_defs
     """
-    hyperparams = module_defs.pop(0)
-    output_filters = [int(hyperparams["channels"])]
-    module_list = nn.ModuleList()
+    hyper_params = module_defs.pop(0)                               # 定义一个变量hyperparams来存储网络的信息
+    output_filters = [int(hyper_params["channels"])]                # 输入图片的通道数
+    module_list = nn.ModuleList()                                   # 返回值nn.ModuleList。这个类相当于一个包含nn.Module对象的普通列表
     for i, module_def in enumerate(module_defs):
         modules = nn.Sequential()
 
@@ -80,15 +81,16 @@ def create_modules(module_defs):
             anchors = [(anchors[i], anchors[i + 1]) for i in range(0, len(anchors), 2)]
             anchors = [anchors[i] for i in anchor_idxs]
             num_classes = int(module_def["classes"])
-            img_height = int(hyperparams["height"])
+            img_height = int(hyper_params["height"])
             # Define detection layer
             yolo_layer = YOLOLayer(anchors, num_classes, img_height)
             modules.add_module("yolo_%d" % i, yolo_layer)
-        # Register module list and number of output filters
-        module_list.append(modules)
-        output_filters.append(filters)
 
-    return hyperparams, module_list
+        # Register module list and number of output filters
+        module_list.append(modules)             # 模块保存
+        output_filters.append(filters)          # 记录每层的输出维度,构建下一层时也会作为输入
+
+    return hyper_params, module_list
 
 
 class EmptyLayer(nn.Module):
