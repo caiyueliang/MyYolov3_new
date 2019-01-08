@@ -23,6 +23,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--batch_size", type=int, default=16, help="size of each image batch")
 parser.add_argument("--model_config_path", type=str, default="config/yolov3.cfg", help="path to model config file")
 parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
+
+parser.add_argument("--train_path", type=str, default="../Data/yolo_data/car_detect_train", help="train_path")
+parser.add_argument("--test_path", type=str, default="../Data/yolo_data/car_detect_test", help="test_path")
+parser.add_argument("--image_file", type=str, default="image_path.txt", help="image_file")
+
 parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")
 parser.add_argument("--class_path", type=str, default="data/coco.names", help="path to class label file")
 parser.add_argument("--iou_thres", type=float, default=0.5, help="iou threshold required to qualify as detected")
@@ -38,7 +43,10 @@ cuda = torch.cuda.is_available() and opt.use_cuda
 
 # Get data configuration
 data_config = parse_data_config(opt.data_config_path)
-test_path = data_config["valid"]
+# test_path = data_config["valid"]
+test_path = opt.test_path
+image_file = opt.image_file
+
 num_classes = int(data_config["classes"])
 
 # Initiate model
@@ -51,7 +59,7 @@ if cuda:
 model.eval()
 
 # Get dataloader
-dataset = ListDataset(test_path)
+dataset = ListDataset(test_path, image_file)
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu)
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor

@@ -24,6 +24,11 @@ parser.add_argument("--image_folder", type=str, default="data/samples", help="pa
 parser.add_argument("--batch_size", type=int, default=16, help="size of each image batch")
 parser.add_argument("--model_config_path", type=str, default="config/yolov3.cfg", help="path to model config file")
 parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
+
+parser.add_argument("--train_path", type=str, default="../Data/yolo_data/car_detect_train", help="train_path")
+parser.add_argument("--test_path", type=str, default="../Data/yolo_data/car_detect_test", help="test_path")
+parser.add_argument("--image_file", type=str, default="image_path.txt", help="image_file")
+
 parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")
 parser.add_argument("--class_path", type=str, default="data/coco.names", help="path to class label file")
 parser.add_argument("--conf_thres", type=float, default=0.8, help="object confidence threshold")
@@ -46,8 +51,10 @@ os.makedirs("checkpoints", exist_ok=True)
 classes = load_classes(opt.class_path)
 
 # Get data configuration
-data_config = parse_data_config(opt.data_config_path)
-train_path = data_config["train"]
+# data_config = parse_data_config(opt.data_config_path)
+# train_path = data_config["train"]
+train_path = opt.train_path
+image_file = opt.image_file
 
 # Get hyper parameters
 hyperparams = parse_model_config(opt.model_config_path)[0]
@@ -68,7 +75,7 @@ model.train()
 
 # Get dataloader
 dataloader = torch.utils.data.DataLoader(
-    ListDataset(train_path), batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu
+    ListDataset(train_path, image_file), batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu
 )
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
