@@ -1,6 +1,9 @@
 # encoding: utf-8
 from __future__ import division
 
+import time
+import cv2
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -244,7 +247,7 @@ class Darknet(nn.Module):
     def __init__(self, config_path, img_size=416):
         super(Darknet, self).__init__()
         self.module_defs = parse_model_config(config_path)
-        self.hyperparams, self.module_list = create_modules(self.module_defs)
+        self.hyper_params, self.module_list = create_modules(self.module_defs)
         self.img_size = img_size
         self.seen = 0
         self.header_info = np.array([0, 0, 0, self.seen, 0])
@@ -267,7 +270,8 @@ class Darknet(nn.Module):
             elif module_def["type"] == "yolo":
                 # Train phase: get loss
                 if is_training:
-                    x, *losses = module[0](x, targets)
+                    # x, *losses = module[0](x, targets)                TODO
+                    x, losses = module[0](x, targets)
                     for name, loss in zip(self.loss_names, losses):
                         self.losses[name] += loss
                 # Test phase: Get detections
@@ -359,3 +363,54 @@ class Darknet(nn.Module):
                 conv_layer.weight.data.cpu().numpy().tofile(fp)
 
         fp.close()
+
+
+# ================================================================================
+# 测试前向传播：创建虚拟输入的函数，我们将把这个输入传递给我们的网络。
+def get_test_input(image_path):
+    img = cv2.imread(image_path)
+    img = cv2.resize(img, (416, 416))               # Resize to the input dimension
+    img_ = img[:, :, ::-1].transpose((2, 0, 1))     # BGR -> RGB | H X W C -> C X H X W
+    img_ = img_[np.newaxis, :, :, :] / 255.0        # Add a channel at 0 (for batch) | Normalise
+    img_ = torch.from_numpy(img_).float()           # Convert to float
+    img_ = Variable(img_)                           # Convert to Variable
+    return img_
+
+
+# 拿一张图片进行测试：该张量的形状为1 x 10647 x 85.第一个维度是批量大小，因为我们使用了单个图像，所以它的大小仅为1。
+# 对于批次中的每个图像，我们都有一个10647 x 85的表格。该表格中的每一行代表一个边界框。（4个bbox属性，1个目标分数和80个类别分数）
+def my_test(cfg_path, weights_path, image_path):
+    model = Darknet(cfg_path)
+    model.load_weights(weights_path)
+    inp = get_test_input(image_path)
+    print('[use GPU] %s' % torch.cuda.is_available())
+    if torch.cuda.is_available():
+        inp = inp.cuda()
+        model = model.cuda()
+
+    start = time.time()
+    for i in range(10):
+        pred = model(inp)
+
+        # print(pred.data)
+        # print(pred.shape)
+        # for i in range(len(pred)):
+        #     np.savetxt('output_' + str(i) + '.txt', pred[i])
+
+        # output = write_results(pred, 0.8, 80)                       # 筛选网络输出结果，获取可信度高的方框
+        # 每个检测有8个属性：即检测的图像在所属批次中的索引，4个角坐标，目标分数，最大置信度类别的分数以及该类别的索引。
+        # print(output.data)
+
+    end = time.time()
+    print('time: %f' % ((end - start) / 10))
+
+
+# ================================================================================
+if __name__ == '__main__':
+    cfg_path = 'config/yolov3.cfg'
+    weights_path = 'weights/yolov3.weights'
+    # cfg_path = 'config/yolov3-tiny.cfg'
+    # weights_path = 'weights/yolov3-tiny.weights'
+
+    test_image_path = 'data/samples/dog.jpg'
+    my_test(cfg_path, weights_path, test_image_path)
