@@ -80,7 +80,7 @@ def create_modules(module_defs):
         # classes = 80
         # num = 9
         # jitter = .3
-        # ignore_thresh = .5
+        # ignore_thresh = .7
         # truth_thresh = 1
         # random = 1
         elif module_def["type"] == "yolo":
@@ -88,9 +88,9 @@ def create_modules(module_defs):
             # Extract anchors
             anchors = [int(x) for x in module_def["anchors"].split(",")]
             anchors = [(anchors[i], anchors[i + 1]) for i in range(0, len(anchors), 2)]
-            anchors = [anchors[i] for i in anchor_idxs]
-            num_classes = int(module_def["classes"])
-            img_height = int(hyper_params["height"])
+            anchors = [anchors[i] for i in anchor_idxs]             # anchors: [(116, 90), (156, 198), (373, 326)]
+            num_classes = int(module_def["classes"])                # 类别个数
+            img_height = int(hyper_params["height"])                # 输入图片的高度
             # Define detection layer
             yolo_layer = YOLOLayer(anchors, num_classes, img_height)
             modules.add_module("yolo_%d" % i, yolo_layer)
@@ -114,17 +114,17 @@ class YOLOLayer(nn.Module):
 
     def __init__(self, anchors, num_classes, img_dim):
         super(YOLOLayer, self).__init__()
-        self.anchors = anchors
-        self.num_anchors = len(anchors)
-        self.num_classes = num_classes
-        self.bbox_attrs = 5 + num_classes
-        self.image_dim = img_dim
-        self.ignore_thres = 0.5
+        self.anchors = anchors                                      # anchors: [(116, 90), (156, 198), (373, 326)]
+        self.num_anchors = len(anchors)                             # num_anchors: 3
+        self.num_classes = num_classes                              # 类别个数
+        self.bbox_attrs = 5 + num_classes                           # bbox的属性： 中心坐标，尺寸，目标分数（5个）和C个类
+        self.image_dim = img_dim                                    # 输入图片的高度
+        self.ignore_thres = 0.5                                     # 忽略的阈值 TODO
         self.lambda_coord = 1
 
-        self.mse_loss = nn.MSELoss(size_average=True)  # Coordinate loss
-        self.bce_loss = nn.BCELoss(size_average=True)  # Confidence loss
-        self.ce_loss = nn.CrossEntropyLoss()  # Class loss
+        self.mse_loss = nn.MSELoss(size_average=True)               # Coordinate loss   中心坐标损失函数
+        self.bce_loss = nn.BCELoss(size_average=True)               # Confidence loss   置信度损失函数
+        self.ce_loss = nn.CrossEntropyLoss()                        # Class loss        交叉熵
 
     def forward(self, x, targets=None):
         nA = self.num_anchors
@@ -163,7 +163,7 @@ class YOLOLayer(nn.Module):
 
         # Training
         if targets is not None:
-
+            # x训练代码
             if x.is_cuda:
                 self.mse_loss = self.mse_loss.cuda()
                 self.bce_loss = self.bce_loss.cuda()
