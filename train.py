@@ -19,9 +19,9 @@ from torch.autograd import Variable
 import torch.optim as optim
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--epochs", type=int, default=30, help="number of epochs")
+parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
 parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
-parser.add_argument("--batch_size", type=int, default=16, help="size of each image batch")
+parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
 parser.add_argument("--model_config_path", type=str, default="config/yolov3.cfg", help="path to model config file")
 parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
 
@@ -45,8 +45,14 @@ print(opt)
 
 cuda = torch.cuda.is_available() and opt.use_cuda
 
-os.makedirs("output", exist_ok=True)
-os.makedirs("checkpoints", exist_ok=True)
+try:
+    os.makedirs("output")
+except:
+    qwe = None
+try:
+    os.makedirs("checkpoints")
+except:
+    qwe = None
 
 classes = load_classes(opt.class_path)
 

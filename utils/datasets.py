@@ -53,6 +53,7 @@ class ListDataset(Dataset):
         self.image_file = image_file
         with open(os.path.join(self.root_path, self.image_file), 'r') as file:
             self.img_files = file.readlines()
+        self.img_files = [os.path.join(self.root_path, files.replace('\n', '')) for files in self.img_files]
         self.label_files = [path.replace('images', 'labels').replace('.png', '.txt').replace('.jpg', '.txt') for path in self.img_files]
         print(self.img_files)
         print(self.label_files)
