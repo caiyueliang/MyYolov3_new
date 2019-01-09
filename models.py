@@ -25,7 +25,9 @@ def create_modules(module_defs):
     Constructs module list of layer blocks from module configuration in module_defs
     """
     hyper_params = module_defs.pop(0)                               # 定义一个变量hyper_params来存储网络的信息
-    output_filters = [int(hyper_params["channels"])]                # 输入图片的通道数
+    prev_filters = 3
+    # output_filters = [int(hyper_params["channels"])]              # 输入图片的通道数
+    output_filters = []                                             # 输入图片的通道数
     module_list = nn.ModuleList()                                   # 返回值nn.ModuleList。这个类相当于一个包含nn.Module对象的普通列表
     for i, module_def in enumerate(module_defs):
         modules = nn.Sequential()
@@ -38,7 +40,8 @@ def create_modules(module_defs):
             modules.add_module(
                 "conv_%d" % i,
                 nn.Conv2d(
-                    in_channels=output_filters[-1],
+                    # in_channels=output_filters[-1],
+                    in_channels=prev_filters,
                     out_channels=filters,
                     kernel_size=kernel_size,
                     stride=int(module_def["stride"]),
@@ -103,6 +106,7 @@ def create_modules(module_defs):
 
         # Register module list and number of output filters
         module_list.append(modules)                                 # 模块保存
+        prev_filters = filters
         output_filters.append(filters)                              # 记录每层的输出维度,构建下一层时也会作为输入
 
     print(output_filters)
@@ -406,7 +410,7 @@ def my_test(cfg_path, weights_path, image_path):
         model = model.cuda()
 
     start = time.time()
-    for i in range(1):
+    for i in range(100):
         pred = model(inp)
 
         # print(pred.data)
@@ -419,7 +423,7 @@ def my_test(cfg_path, weights_path, image_path):
         # print(output.data)
 
     end = time.time()
-    print('time: %f' % ((end - start) / 1))
+    print('time: %f' % ((end - start) / 100))
 
 
 # ================================================================================
@@ -428,6 +432,8 @@ if __name__ == '__main__':
     weights_path = 'weights/yolov3.weights'
     # cfg_path = 'config/yolov3-tiny.cfg'
     # weights_path = 'weights/yolov3-tiny.weights'
+
+    # cfg_path = 'config/lpr_yolov3-tiny.cfg'
 
     test_image_path = 'data/samples/dog.jpg'
     my_test(cfg_path, weights_path, test_image_path)
