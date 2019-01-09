@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
 parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
 parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
-parser.add_argument("--model_config_path", type=str, default="config/yolov3.cfg", help="path to model config file")
+parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="path to model config file")
 # parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
 
 parser.add_argument("--train_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_train", help="train_path")
@@ -30,7 +30,7 @@ parser.add_argument("--test_path", type=str, default="../Data/yolo/yolo_data_new
 parser.add_argument("--image_file", type=str, default="image_path.txt", help="image_file")
 
 parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")
-parser.add_argument("--class_path", type=str, default="data/coco.names", help="path to class label file")
+parser.add_argument("--class_path", type=str, default="../Data/yolo/yolo_data_new/lpr.names", help="path to class label file")
 parser.add_argument("--conf_thres", type=float, default=0.8, help="object confidence threshold")
 parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold for non-maximum suppression")
 parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
@@ -55,6 +55,7 @@ except:
     qwe = None
 
 classes = load_classes(opt.class_path)
+print('classes: %s' % classes)
 
 # Get data configuration
 # data_config = parse_data_config(opt.data_config_path)

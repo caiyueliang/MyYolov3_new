@@ -134,6 +134,11 @@ class YOLOLayer(nn.Module):
         nB = x.size(0)
         nG = x.size(2)
         stride = self.image_dim / nG
+        # print(x.size())
+        # print(nA)
+        # print(nB)
+        # print(nG)
+        # print(stride)
 
         # Tensors for cuda support
         FloatTensor = torch.cuda.FloatTensor if x.is_cuda else torch.FloatTensor
