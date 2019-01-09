@@ -206,6 +206,7 @@ class YOLOLayer(nn.Module):
             conf_mask_false = conf_mask - mask
 
             # Mask outputs to ignore non-existing objects
+            # x, y, w, h 用MSELoss, conf 用BCELoss, 类别用CrossEntropyLoss
             loss_x = self.mse_loss(x[mask], tx[mask])
             loss_y = self.mse_loss(y[mask], ty[mask])
             loss_w = self.mse_loss(w[mask], tw[mask])
@@ -214,6 +215,8 @@ class YOLOLayer(nn.Module):
                 pred_conf[conf_mask_true], tconf[conf_mask_true]
             )
             loss_cls = (1 / nB) * self.ce_loss(pred_cls[mask], torch.argmax(tcls[mask], 1))
+
+            # 总损失是上面各自的损失的累加
             loss = loss_x + loss_y + loss_w + loss_h + loss_conf + loss_cls
 
             return loss, (
