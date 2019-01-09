@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .idea/
 output/
+checkpoints/
 data/coco/
 weights/*.weights
 .Python
