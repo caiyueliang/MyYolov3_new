@@ -34,7 +34,7 @@ def data_pre_process(root_path, old_label_file, output_path, output_label_file, 
         print str_list
         image_path = str_list[0]
         print image_path
-        label_path = image_path.replace('.jpg', '.txt').replace('.png', '.txt')
+        label_path = image_path.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')
         print label_path
 
         target_image_path = os.path.join(output_path, image_path)

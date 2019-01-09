@@ -69,6 +69,7 @@ class ListDataset(Dataset):
 
         img_path = self.img_files[index % len(self.img_files)].rstrip()
         img = np.array(Image.open(img_path))
+        print(img_path)
 
         # Handles images with less than three channels
         while len(img.shape) != 3:
