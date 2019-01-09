@@ -23,10 +23,10 @@ parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
 parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
 parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
 parser.add_argument("--model_config_path", type=str, default="config/yolov3.cfg", help="path to model config file")
-parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
+# parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
 
-parser.add_argument("--train_path", type=str, default="../Data/yolo_data/car_detect_train", help="train_path")
-parser.add_argument("--test_path", type=str, default="../Data/yolo_data/car_detect_test", help="test_path")
+parser.add_argument("--train_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_train", help="train_path")
+parser.add_argument("--test_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_test", help="test_path")
 parser.add_argument("--image_file", type=str, default="image_path.txt", help="image_file")
 
 parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")

@@ -55,8 +55,8 @@ class ListDataset(Dataset):
             self.img_files = file.readlines()
         self.img_files = [os.path.join(self.root_path, files.replace('\n', '')) for files in self.img_files]
         self.label_files = [path.replace('images', 'labels').replace('.png', '.txt').replace('.jpg', '.txt') for path in self.img_files]
-        print(self.img_files)
-        print(self.label_files)
+        print('img_files len: %d' % len(self.img_files))
+        print('label_files len: %d' % len(self.label_files))
 
         self.img_shape = img_size
         self.max_objects = 50
@@ -122,6 +122,9 @@ class ListDataset(Dataset):
             filled_labels[range(len(labels))[:self.max_objects]] = labels[:self.max_objects]
         filled_labels = torch.from_numpy(filled_labels)
 
+        # print(img_path)
+        # print(input_img)
+        # print(filled_labels)
         return img_path, input_img, filled_labels
 
     def __len__(self):
