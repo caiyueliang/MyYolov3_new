@@ -67,8 +67,6 @@ class ModuleTrain:
         print('classes: %s' % self.classes)
 
         # Get data configuration
-        # data_config = parse_data_config(opt.data_config_path)
-        # train_path = data_config["train"]
         self.train_path = self.opt.train_path
         self.image_file = self.opt.image_file
 
@@ -87,6 +85,8 @@ class ModuleTrain:
         if self.cuda:
             self.model = self.model.cuda()
 
+        self.tensor = torch.cuda.FloatTensor if self.cuda else torch.FloatTensor
+
         # Get dataloader
         self.dataloader = torch.utils.data.DataLoader(ListDataset(self.train_path, self.image_file), shuffle=False,
                                                       batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
@@ -96,18 +96,14 @@ class ModuleTrain:
     def train(self):
         self.model.train()
 
-        tensor = torch.cuda.FloatTensor if self.cuda else torch.FloatTensor
-
         for epoch in range(self.opt.epochs):
             train_loss = 0.0
             for batch_i, (_, imgs, targets) in enumerate(self.dataloader):
-                imgs = Variable(imgs.type(tensor))
-                targets = Variable(targets.type(tensor), requires_grad=False)
+                imgs = Variable(imgs.type(self.tensor))
+                targets = Variable(targets.type(self.tensor), requires_grad=False)
 
                 self.optimizer.zero_grad()
-
                 loss = self.model(imgs, targets)
-
                 loss.backward()
                 self.optimizer.step()
 
