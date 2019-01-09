@@ -241,8 +241,16 @@ def show_image(image_file):
     cv2.waitKey(0)
 
 
+def show_images(root_path):
+    for root, dirs, files in os.walk(root_path):
+        for file in files:
+            if '.txt' not in file:
+                show_image(os.path.join(root, file))
+
+
 if __name__ == '__main__':
-    show_image("../Data/yolo/yolo_data_new/car_detect_train/daozha_1/480466_闽DF3N37.jpg")
+    # show_image("../Data/yolo/yolo_data_new/car_detect_train/daozha_1/480466_闽DF3N37.jpg")
+    show_images("../Data/yolo/yolo_data_new/car_detect_train/")
 
     # root_dir = '../Data/yolo/yolo_data_new/car_detect_train/'
     # copy_dir = '../Data/yolo/yolo_data_new/car_detect_test/'
