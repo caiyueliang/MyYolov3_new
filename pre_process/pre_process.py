@@ -126,10 +126,10 @@ def data_pre_process_1(root_path, old_label_file, class_index):
 
 if __name__ == '__main__':
     # 从源数据中拷贝出来
-    data_pre_process('../../Data/yolo_data/car_detect_train/', 'car_detect_train_label.txt',
-                     '../../Data/yolo_data_new/car_detect_train/', 'image_path.txt', "0")
-    data_pre_process('../../Data/yolo_data/car_detect_test/', 'car_detect_test_label.txt',
-                     '../../Data/yolo_data_new/car_detect_test/', 'image_path.txt', "0")
+    data_pre_process('../../Data/yolo/yolo_data/car_detect_train/', 'car_detect_train_label.txt',
+                     '../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', "0")
+    data_pre_process('../../Data/yolo/yolo_data/car_detect_test/', 'car_detect_test_label.txt',
+                     '../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', "0")
     # 在源数据中处理
-    data_pre_process_1('../../Data/yolo_data_new/car_detect_train/', 'car_loc_label.txt', "1")
-    data_pre_process_1('../../Data/yolo_data_new/car_detect_test/', 'car_loc_label.txt', "1")
+    data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_train/', 'car_loc_label.txt', "1")
+    data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_test/', 'car_loc_label.txt', "1")
