@@ -12,6 +12,17 @@ my_access_token = ['24.486cc9beb6b983cc636628803b3618fa.2592000.1547862801.28233
                    '24.bdbf3b4dba262da4df0667d3b0b3f024.2592000.1547880857.282335-15220901']
 
 
+def mkdir_if_not_exist(path):
+    if not os.path.exists(os.path.join(path)):
+        os.makedirs(os.path.join(path))
+
+
+# 写数据 flag:'a+':追加 |'w+'
+def write_data(file_name, data, flag):
+    with open(file_name, flag) as f:
+        f.write(data)
+
+
 def get_access_token(api_key, secret_key):
     # client_id 为官网获取的AK， client_secret 为官网获取的SK
     host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + api_key + \
@@ -63,54 +74,78 @@ def auto_clean(root_path):
                 shutil.move(old_file_path, new_file_path)
 
 
+# 判断文件是否存在
+def file_exist(file_name, file_info_list):
+    for record in file_info_list:
+        if file_name == record.split(" ")[0]:
+            return True
+    return False
+
+
 # 自动标记
-def auto_sign(root_path):
+def auto_sign(root_path, image_path_file, output_label_file):
     use_token_id = 0
 
-    for root, dirs, files in os.walk(root_path):
-        for file in files:
-            old_file_path = os.path.join(root, file)
+    if os.path.exists(os.path.join(root_path, output_label_file)):
+        with open(os.path.join(root_path, output_label_file), 'r') as file:
+            processed_files = file.readlines()
+    else:
+        processed_files = list()
+    print('processed_files len: %d' % len(processed_files))
 
-            # 没有百度标志，表示没进行识别
-            if '_baidu_' not in file:
-                print old_file_path
-                success, token_err, result = post_image_base64_baidu(old_file_path, my_access_token[use_token_id])
-                while token_err:
-                    if use_token_id < len(my_access_token) - 1:
-                        use_token_id += 1
-                        print('change token id to: %s' % my_access_token[use_token_id])
-                        success, token_err, result = post_image_base64_baidu(old_file_path, my_access_token[use_token_id])
-                    else:
-                        print('[auto_sign] all access_token used !')
-                        return
+    with open(os.path.join(root_path, image_path_file), 'r') as file:
+        unprocess_files = file.readlines()
+    print('unprocess_files len: %d' % len(unprocess_files))
 
-                if success:
-                    year_0 = str(result['result'][0]['year']) if type(result['result'][0]['year']) == int else result['result'][0]['year'].encode('utf-8')
-                    year_1 = str(result['result'][1]['year']) if type(result['result'][1]['year']) == int else result['result'][1]['year'].encode('utf-8')
-                    new_file_name = file.split('.')[0] + '_baidu' + \
-                                    '_' + result['result'][0]['name'].replace('/', '').encode('utf-8') + \
-                                    '_' + str(result['result'][0]['score']) + \
-                                    '_' + year_0 + \
-                                    '_' + result['result'][1]['name'].replace('/', '').encode('utf-8') + \
-                                    '_' + str(result['result'][1]['score']) + \
-                                    '_' + year_1 + \
-                                    '_' + str(result["location_result"]["top"]) + \
-                                    '_' + str(result["location_result"]["left"]) + \
-                                    '_' + str(result["location_result"]["width"]) + \
-                                    '_' + str(result["location_result"]["height"]) + \
-                                    '.' + file.split('.')[-1]
-                    print(new_file_name)
-                    new_file_path = os.path.join(root, new_file_name)
-                    shutil.move(old_file_path, new_file_path)
+    for file_name in unprocess_files:
+        file_name = file_name.rstrip()
+        print("file_name: %s" % file_name)
+        if not file_exist(file_name, processed_files):
+            print("file no exist: %s" % file_name)
+
+            old_file_path = os.path.join(root_path, file_name)
+            # print old_file_path
+
+            success, token_err, result = post_image_base64_baidu(old_file_path, my_access_token[use_token_id])
+            while token_err:
+                if use_token_id < len(my_access_token) - 1:
+                    use_token_id += 1
+                    print('change token id to: %s' % my_access_token[use_token_id])
+                    success, token_err, result = post_image_base64_baidu(old_file_path, my_access_token[use_token_id])
                 else:
-                    new_file_name = file.split('.')[0] + '_baidu_None_0.0_0_None_0.0_0.' + file.split('.')[-1]
-                    new_file_path = os.path.join(root, new_file_name)
-                    shutil.move(old_file_path, new_file_path)
+                    print('[auto_sign] all access_token used !')
+                    return
 
-
-def mkdir_if_not_exist(path):
-    if not os.path.exists(os.path.join(path)):
-        os.makedirs(os.path.join(path))
+            if success:
+                save_str = file_name + ' ' + '1' + \
+                           ' ' + str(result["location_result"]["left"]) + \
+                           ' ' + str(result["location_result"]["top"]) + \
+                           ' ' + str(result["location_result"]["width"]) + \
+                           ' ' + str(result["location_result"]["height"]) + \
+                           ' ' + '1'
+                write_data(os.path.join(root_path, output_label_file), save_str + '\n', 'a+')
+                # year_0 = str(result['result'][0]['year']) if type(result['result'][0]['year']) == int else result['result'][0]['year'].encode('utf-8')
+                # year_1 = str(result['result'][1]['year']) if type(result['result'][1]['year']) == int else result['result'][1]['year'].encode('utf-8')
+                # new_file_name = file.split('.')[0] + '_baidu' + \
+                #                 '_' + result['result'][0]['name'].replace('/', '').encode('utf-8') + \
+                #                 '_' + str(result['result'][0]['score']) + \
+                #                 '_' + year_0 + \
+                #                 '_' + result['result'][1]['name'].replace('/', '').encode('utf-8') + \
+                #                 '_' + str(result['result'][1]['score']) + \
+                #                 '_' + year_1 + \
+                #                 '_' + str(result["location_result"]["top"]) + \
+                #                 '_' + str(result["location_result"]["left"]) + \
+                #                 '_' + str(result["location_result"]["width"]) + \
+                #                 '_' + str(result["location_result"]["height"]) + \
+                #                 '.' + file.split('.')[-1]
+                # print(new_file_name)
+                # new_file_path = os.path.join(root_path, new_file_name)
+                # shutil.move(old_file_path, new_file_path)
+            else:
+                print('post_image_base64_baidu fail .. %s' % file_name)
+                # new_file_name = file.split('.')[0] + '_baidu_None_0.0_0_None_0.0_0.' + file.split('.')[-1]
+                # new_file_path = os.path.join(root_path, new_file_name)
+                # shutil.move(old_file_path, new_file_path)
 
 
 # 自动拷贝
@@ -142,5 +177,5 @@ if __name__ == '__main__':
     # post_image_base64_baidu('./112.jpg', '24.486cc9beb6b983cc636628803b3618fa.2592000.1547862801.282335-15215859')
 
     # 自动标记
-    auto_sign('../../Data/car_classifier/clean_car/car_data')
-    # auto_sign('../../Data/car_classifier/vanke_car/src_data')
+    auto_sign('../../Data/yolo_data_new/car_detect_train/', 'image_path.txt', 'car_loc_label.txt')
+    # auto_sign('../../Data/yolo_data_new/car_detect_test/', 'image_path.txt', 'car_loc_label.txt')
