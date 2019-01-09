@@ -70,7 +70,10 @@ def create_modules(module_defs):
 
         elif module_def["type"] == "route":
             layers = [int(x) for x in module_def["layers"].split(",")]
+            print('layers', layers)
+            print('before layers', [output_filters[layer_i] for layer_i in layers])
             filters = sum([output_filters[layer_i] for layer_i in layers])
+            print('filters', filters)
             modules.add_module("route_%d" % i, EmptyLayer())
 
         elif module_def["type"] == "shortcut":
@@ -102,6 +105,7 @@ def create_modules(module_defs):
         module_list.append(modules)                                 # 模块保存
         output_filters.append(filters)                              # 记录每层的输出维度,构建下一层时也会作为输入
 
+    print(output_filters)
     return hyper_params, module_list
 
 
@@ -267,17 +271,17 @@ class Darknet(nn.Module):
         for i, (module_def, module) in enumerate(zip(self.module_defs, self.module_list)):
             if module_def["type"] in ["convolutional", "upsample", "maxpool"]:
                 x = module(x)
-                print(module_def["type"], x.size())
+                # print(module_def["type"], x.size())
 
             elif module_def["type"] == "route":
                 layer_i = [int(x) for x in module_def["layers"].split(",")]
                 x = torch.cat([layer_outputs[i] for i in layer_i], 1)
-                print(module_def["type"], x.size())
+                # print(module_def["type"], x.size())
 
             elif module_def["type"] == "shortcut":
                 layer_i = int(module_def["from"])
                 x = layer_outputs[-1] + layer_outputs[layer_i]
-                print(module_def["type"], x.size())
+                # print(module_def["type"], x.size())
 
             elif module_def["type"] == "yolo":
                 # Train phase: get loss
@@ -290,7 +294,7 @@ class Darknet(nn.Module):
                 else:
                     x = module(x)
                 output.append(x)
-                print(module_def["type"], x.size())
+                # print(module_def["type"], x.size())
             layer_outputs.append(x)
 
         self.losses["recall"] /= 3
@@ -420,10 +424,10 @@ def my_test(cfg_path, weights_path, image_path):
 
 # ================================================================================
 if __name__ == '__main__':
-    # cfg_path = 'config/yolov3.cfg'
-    # weights_path = 'weights/yolov3.weights'
-    cfg_path = 'config/yolov3-tiny.cfg'
-    weights_path = 'weights/yolov3-tiny.weights'
+    cfg_path = 'config/yolov3.cfg'
+    weights_path = 'weights/yolov3.weights'
+    # cfg_path = 'config/yolov3-tiny.cfg'
+    # weights_path = 'weights/yolov3-tiny.weights'
 
     test_image_path = 'data/samples/dog.jpg'
     my_test(cfg_path, weights_path, test_image_path)

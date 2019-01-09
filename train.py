@@ -19,7 +19,7 @@ from torch.autograd import Variable
 import torch.optim as optim
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
+parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
 parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
 parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
 parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="path to model config file")
