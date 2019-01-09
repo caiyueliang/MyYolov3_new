@@ -73,10 +73,10 @@ def create_modules(module_defs):
 
         elif module_def["type"] == "route":
             layers = [int(x) for x in module_def["layers"].split(",")]
-            print('layers', layers)
-            print('before layers', [output_filters[layer_i] for layer_i in layers])
+            # print('layers', layers)
+            # print('before layers', [output_filters[layer_i] for layer_i in layers])
             filters = sum([output_filters[layer_i] for layer_i in layers])
-            print('filters', filters)
+            # print('filters', filters)
             modules.add_module("route_%d" % i, EmptyLayer())
 
         elif module_def["type"] == "shortcut":
@@ -109,7 +109,7 @@ def create_modules(module_defs):
         prev_filters = filters
         output_filters.append(filters)                              # 记录每层的输出维度,构建下一层时也会作为输入
 
-    print(output_filters)
+    # print(output_filters)
     return hyper_params, module_list
 
 
