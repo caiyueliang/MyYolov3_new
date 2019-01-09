@@ -43,8 +43,10 @@ def data_pre_process(root_path, old_label_file, output_path, output_label_file, 
         write_data(output_label_path, image_path + '\n', 'a+')      # 写图片路径到output_label_file
         image = cv2.imread(os.path.join(root_path, image_path))
         h, w, c = image.shape
+
         print('(h, w, c): (%d, %d, %d)' % (h, w, c))
         save_str = class_index + " "
+        save_flag = True
         for i, temp in enumerate(str_list[2:]):
             print i, temp
             if i % 5 == 0:
@@ -52,14 +54,20 @@ def data_pre_process(root_path, old_label_file, output_path, output_label_file, 
             elif i % 5 == 1:
                 save_str += str((float(temp) + float(str_list[2 + 2 + i]) / 2) / h) + " "
             elif i % 5 == 2:
+                if float(temp) == 0.0:
+                    save_flag = False
                 save_str += str(float(temp) / w) + " "
             elif i % 5 == 3:
+                if float(temp) == 0.0:
+                    save_flag = False
                 save_str += str(float(temp) / h) + " "
             elif i % 5 == 4:
-                # 写标签到（output_label_path, label_path）
-                print save_str
-                write_data(os.path.join(output_path, label_path), save_str + '\n', 'a+')
+                if save_flag is True:
+                    # 写标签到（output_label_path, label_path）
+                    print save_str
+                    write_data(os.path.join(output_path, label_path), save_str + '\n', 'a+')
                 save_str = class_index + " "
+                save_flag = True
     return
 
 
