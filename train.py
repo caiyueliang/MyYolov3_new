@@ -23,26 +23,27 @@ import torch.optim as optim
 def parse_argvs():
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
-    parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
+    # parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
     parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
-    # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="path to model config file")
-    parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3-tiny.cfg", help="path to model config file")
+    # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
+    parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3-tiny.cfg", help="model_config_path")
 
+    parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo_tiny.weights", help="")
     # parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
-    parser.add_argument("--train_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_train", help="train_path")
-    parser.add_argument("--test_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_test", help="test_path")
+    parser.add_argument("--train_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_train", help="")
+    parser.add_argument("--test_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_test", help="")
     parser.add_argument("--image_file", type=str, default="image_path.txt", help="image_file")
 
-    parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")
-    parser.add_argument("--class_path", type=str, default="../Data/yolo/yolo_data_new/lpr.names", help="path to class label file")
+    # parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")
+    parser.add_argument("--class_path", type=str, default="../Data/yolo/yolo_data_new/lpr.names", help="")
     parser.add_argument("--conf_thres", type=float, default=0.8, help="object confidence threshold")
     parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold for non-maximum suppression")
-    parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
+    parser.add_argument("--n_cpu", type=int, default=4, help="number of cpu threads to use during batch generation")
     parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")
-    parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo_tiny.weights", help="checkpoint_name")
+
     # parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="checkpoint_dir")
     parser.add_argument("--use_cuda", type=bool, default=True, help="whether to use cuda if available")
-
+    parser.add_argument("--re_train", type=bool, default=False, help="re_train")
     parser.add_argument("--best_loss", type=float, default=10.0, help="best_loss")
     parser.add_argument("--detail_log", type=bool, default=False, help="detail_log")
 
@@ -55,6 +56,7 @@ class ModuleTrain:
     def __init__(self, opt):
         self.opt = opt
         self.best_loss = self.opt.best_loss
+        self.re_train = self.opt.re_train
         self.cuda = torch.cuda.is_available() and opt.use_cuda
 
         try:
@@ -83,6 +85,10 @@ class ModuleTrain:
         # Initiate model
         self.model = Darknet(opt.model_config_path)
         # model.load_weights(opt.weights_path)
+        # 加载模型
+        if os.path.exists(self.opt.checkpoint_name) and not self.re_train:
+            self.model.load_weights(opt.weights_path)
+
         self.model.apply(weights_init_normal)
 
         if self.cuda:
