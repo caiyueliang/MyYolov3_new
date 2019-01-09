@@ -216,8 +216,7 @@ class YOLOLayer(nn.Module):
             loss_cls = (1 / nB) * self.ce_loss(pred_cls[mask], torch.argmax(tcls[mask], 1))
             loss = loss_x + loss_y + loss_w + loss_h + loss_conf + loss_cls
 
-            return (
-                loss,
+            return loss, (
                 loss_x.item(),
                 loss_y.item(),
                 loss_w.item(),
