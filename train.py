@@ -1,3 +1,4 @@
+# encoding:utf-8
 from __future__ import division
 
 from models import *
@@ -38,10 +39,11 @@ def parse_argvs():
     parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold for non-maximum suppression")
     parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
     parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")
-    parser.add_argument("--checkpoint_interval", type=int, default=1, help="interval between saving model weights")
-    parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="directory where model checkpoints are saved")
+    parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo_tiny.weights", help="checkpoint_name")
+    # parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="checkpoint_dir")
     parser.add_argument("--use_cuda", type=bool, default=True, help="whether to use cuda if available")
 
+    parser.add_argument("--best_loss", type=float, default=10.0, help="best_loss")
     parser.add_argument("--detail_log", type=bool, default=False, help="detail_log")
 
     opt = parser.parse_args()
@@ -52,6 +54,7 @@ def parse_argvs():
 class ModuleTrain:
     def __init__(self, opt):
         self.opt = opt
+        self.best_loss = self.opt.best_loss
         self.cuda = torch.cuda.is_available() and opt.use_cuda
 
         try:
@@ -131,8 +134,21 @@ class ModuleTrain:
             train_loss /= len(self.dataloader)
             print ('[Train] Epoch [%d/%d] average_loss: %.6f lr: %.6f' % (epoch + 1, self.opt.epochs, train_loss, 1))
 
-            if epoch % self.opt.checkpoint_interval == 0:
-                self.model.save_weights("%s/%d.weights" % (self.opt.checkpoint_dir, epoch))
+            if self.best_loss > train_loss:
+                self.best_loss = train_loss
+                str_list = self.opt.checkpoint_name.split('.')
+                best_model_file = ""
+                for str_index in range(len(str_list)):
+                    best_model_file = best_model_file + str_list[str_index]
+                    if str_index == (len(str_list) - 2):
+                        best_model_file += '_best'
+                    if str_index != (len(str_list) - 1):
+                        best_model_file += '.'
+                self.model.save_weights(best_model_file)  # 保存最好的模型
+
+        self.model.save_weights(self.opt.checkpoint_name)  # 保存最好的模型
+        # if epoch % self.opt.checkpoint_interval == 0:
+        #     self.model.save_weights("%s/%d.weights" % (self.opt.checkpoint_dir, epoch))
 
 
 if __name__ == '__main__':
