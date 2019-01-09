@@ -36,10 +36,11 @@ parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold
 parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
 parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")
 parser.add_argument("--checkpoint_interval", type=int, default=1, help="interval between saving model weights")
-parser.add_argument(
-    "--checkpoint_dir", type=str, default="checkpoints", help="directory where model checkpoints are saved"
-)
+parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="directory where model checkpoints are saved")
 parser.add_argument("--use_cuda", type=bool, default=True, help="whether to use cuda if available")
+
+parser.add_argument("--detail_log", type=bool, default=False, help="detail_log")
+
 opt = parser.parse_args()
 print(opt)
 
@@ -90,6 +91,7 @@ Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()))
 
 for epoch in range(opt.epochs):
+    train_loss = 0.0
     for batch_i, (_, imgs, targets) in enumerate(dataloader):
         imgs = Variable(imgs.type(Tensor))
         targets = Variable(targets.type(Tensor), requires_grad=False)
@@ -101,26 +103,31 @@ for epoch in range(opt.epochs):
         loss.backward()
         optimizer.step()
 
-        print(
-            "[Epoch %d/%d, Batch %d/%d] [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f, total %.5f, recall: %.5f, precision: %.5f]"
-            % (
-                epoch,
-                opt.epochs,
-                batch_i,
-                len(dataloader),
-                model.losses["x"],
-                model.losses["y"],
-                model.losses["w"],
-                model.losses["h"],
-                model.losses["conf"],
-                model.losses["cls"],
-                loss.item(),
-                model.losses["recall"],
-                model.losses["precision"],
+        if opt.detail_log:
+            print(
+                "[Epoch %d/%d, Batch %d/%d] [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f, total %.5f, recall: %.5f, precision: %.5f]"
+                % (
+                    epoch,
+                    opt.epochs,
+                    batch_i,
+                    len(dataloader),
+                    model.losses["x"],
+                    model.losses["y"],
+                    model.losses["w"],
+                    model.losses["h"],
+                    model.losses["conf"],
+                    model.losses["cls"],
+                    loss.item(),
+                    model.losses["recall"],
+                    model.losses["precision"],
+                )
             )
-        )
 
+        train_loss += loss.item()
         model.seen += imgs.size(0)
+
+    train_loss /= len(dataloader)
+    print ('[Train] Epoch [%d/%d] average_loss: %.6f lr: %.6f' % (epoch + 1, opt.epochs, train_loss, 1))
 
     if epoch % opt.checkpoint_interval == 0:
         model.save_weights("%s/%d.weights" % (opt.checkpoint_dir, epoch))
