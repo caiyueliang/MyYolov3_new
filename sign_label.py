@@ -286,6 +286,7 @@ class SignLabel:
         with open(label_file, 'r') as file:
             label_list_str = file.readlines()
 
+        print(label_list_str)
         label_list = list()
         for label in label_list_str:
             temp_list = label.rstrip().split(' ')
@@ -406,24 +407,9 @@ if __name__ == '__main__':
     # show_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/")
 
     sign_label = SignLabel()
-    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/daozha_1/", process_all=True)
+    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/daozha_2/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/", process_all=True)
 
-    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=False)
-
-    # root_dir = '../Data/yolo/yolo_data_new/car_detect_train/'
-    # copy_dir = '../Data/yolo/yolo_data_new/car_detect_test/'
-    # image_dir = "failed_3"
-    # label_file = "./label/car_label.txt"
-    # copy_file = "./label/copy_label.txt"
-    # index_file = "./label/car_index.txt"
-    #
-    # sign_point = SignCarLabel(root_dir=root_dir, image_dir=image_dir, label_file=label_file,
-    #                           index_file=index_file, copy_dir=copy_dir, copy_file=copy_file)
-    #
-    # sign_point.sign_start()
-
-    # root_dir = '../Data/car_rough_detect/car_detect_train/'
-    # label_path = '../Data/car_rough_detect/car_detect_train/car_detect_train_label.txt'
-    # root_dir = '../Data/car_rough_detect/car_detect_test/'
-    # label_path = '../Data/car_rough_detect/car_detect_test/car_detect_test_label.txt'
-    # sign_point.clean_start(root_dir, label_path)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=False)
