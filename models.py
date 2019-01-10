@@ -361,7 +361,7 @@ class Darknet(nn.Module):
     """
 
     def save_weights(self, path, cutoff=-1):
-
+        print('save_weights: %s' % path)
         fp = open(path, "wb")
         self.header_info[3] = self.seen
         self.header_info.tofile(fp)

@@ -23,6 +23,7 @@ import torch.optim as optim
 def parse_argvs():
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
+    parser.add_argument("--decay_epoch", type=int, default=60, help="decay_epoch")
     # parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
     parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
     # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
@@ -38,7 +39,7 @@ def parse_argvs():
     parser.add_argument("--class_path", type=str, default="../Data/yolo/yolo_data_new/lpr.names", help="")
     parser.add_argument("--conf_thres", type=float, default=0.8, help="object confidence threshold")
     parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold for non-maximum suppression")
-    parser.add_argument("--n_cpu", type=int, default=4, help="number of cpu threads to use during batch generation")
+    parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
     parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")
 
     # parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="checkpoint_dir")
@@ -58,6 +59,7 @@ class ModuleTrain:
         self.best_loss = self.opt.best_loss
         self.re_train = self.opt.re_train
         self.cuda = torch.cuda.is_available() and opt.use_cuda
+        self.decay_epoch = self.opt.decay_epoch
 
         try:
             os.makedirs("output")
@@ -100,13 +102,18 @@ class ModuleTrain:
         self.dataloader = torch.utils.data.DataLoader(ListDataset(self.train_path, self.image_file), shuffle=False,
                                                       batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
 
-        self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()))
+        self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=self.learning_rate)
 
     def train(self):
         self.model.train()
 
         for epoch in range(self.opt.epochs):
             train_loss = 0.0
+            if epoch >= self.decay_epoch and epoch % self.decay_epoch == 0:
+                self.learning_rate *= 0.1
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = self.learning_rate
+
             for batch_i, (_, imgs, targets) in enumerate(self.dataloader):
                 imgs = Variable(imgs.type(self.tensor))
                 targets = Variable(targets.type(self.tensor), requires_grad=False)
@@ -138,7 +145,7 @@ class ModuleTrain:
                 self.model.seen += imgs.size(0)
 
             train_loss /= len(self.dataloader)
-            print ('[Train] Epoch [%d/%d] average_loss: %.6f lr: %.6f' % (epoch + 1, self.opt.epochs, train_loss, 1))
+            print ('[Train] Epoch [%d/%d] average_loss: %.6f lr: %.6f' % (epoch + 1, self.opt.epochs, train_loss, self.learning_rate))
 
             if self.best_loss > train_loss:
                 self.best_loss = train_loss
