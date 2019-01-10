@@ -4,6 +4,7 @@ import os
 import time
 import shutil
 import subprocess
+import traceback
 
 # ['EVENT_FLAG_ALTKEY', 'EVENT_FLAG_CTRLKEY', 'EVENT_FLAG_LBUTTON', 'EVENT_FLAG_MBUTTON', 'EVENT_FLAG_RBUTTON',
 # 'EVENT_FLAG_SHIFTKEY', 'EVENT_LBUTTONDBLCLK', 'EVENT_LBUTTONDOWN', 'EVENT_LBUTTONUP', 'EVENT_MBUTTONDBLCLK',
@@ -290,38 +291,77 @@ class SignLabel:
         self.draw_image = self.draw_rectangle(image.copy(), label_list)
 
         while True:
-            cv2.imshow('sign_image', self.draw_image)
+            try:
+                cv2.imshow('sign_image', self.draw_image)
 
-            # 保存车牌标记框
-            k = cv2.waitKey(1) & 0xFF
-            if k == ord('1'):
-                print('[append] class 0: car plate ...')
-                label_list.append(dict())
-                label_list[-1]["class"] = '0'
-                label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1], self.car_points[1][0], self.car_points[1][1])
-                self.car_points = []
-                self.draw_image = self.draw_rectangle(image.copy(), label_list)
-            # 保存车辆标记框
-            if k == ord('2'):
-                print('[append] class 1: car ...')
-                label_list.append(dict())
-                label_list[-1]["class"] = '1'
-                label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1], self.car_points[1][0], self.car_points[1][1])
-                self.car_points = []
-                self.draw_image = self.draw_rectangle(image.copy(), label_list)
-            # 删除标记框
-            if k == ord('!') or k == ord('@') or k == ord('#') or k == ord('$') or k == ord('%') or \
-               k == ord('^') or k == ord('&') or k == ord('*') or k == ord('(') or k == ord(')'):
-                
-            # 重新加载图片
-            if k == ord('r'):
-                print('resign ...')
-                self.car_points = []
-                self.draw_image = self.draw_rectangle(image.copy(), label_list)
-            # 退出，显示下一张
-            if k == ord('q'):
-                print('[next] ...')
-                break
+                # 保存车牌标记框
+                k = cv2.waitKey(1) & 0xFF
+                if k == ord('1'):
+                    print('======================================================')
+                    print('[append] class 0: car plate ...')
+                    if len(self.car_points) == 2:
+                        label_list.append(dict())
+                        label_list[-1]["class"] = '0'
+                        label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1],
+                                                    self.car_points[1][0], self.car_points[1][1])
+                        self.car_points = []
+                        self.draw_image = self.draw_rectangle(image.copy(), label_list)
+                    else:
+                        print('[append] fail: %s' % self.car_points)
+                # 保存车辆标记框
+                if k == ord('2'):
+                    print('======================================================')
+                    print('[append] class 1: car ...')
+                    if len(self.car_points) == 2:
+                        label_list.append(dict())
+                        label_list[-1]["class"] = '1'
+                        label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1],
+                                                    self.car_points[1][0], self.car_points[1][1])
+                        self.car_points = []
+                        self.draw_image = self.draw_rectangle(image.copy(), label_list)
+                    else:
+                        print('[append] fail: %s' % self.car_points)
+                # 重新加载图片
+                if k == ord('r'):
+                    print('======================================================')
+                    print('resign ...')
+                    self.car_points = []
+                    self.draw_image = self.draw_rectangle(image.copy(), label_list)
+                # 退出，显示下一张
+                if k == ord('q'):
+                    print('======================================================')
+                    print('[next] ...')
+                    break
+                # 删除标记框
+                if k == ord('!'):
+                    print('======================================================')
+                    object = label_list.pop(0)
+                    print('[delete] ...index: 1; label: %s' % object)
+                    self.draw_image = self.draw_rectangle(image.copy(), label_list)
+                if k == ord('@'):
+                    print('======================================================')
+                    object = label_list.pop(1)
+                    print('[delete] ...index: 2; label: %s' % object)
+                    self.draw_image = self.draw_rectangle(image.copy(), label_list)
+                if k == ord('#'):
+                    print('======================================================')
+                    object = label_list.pop(2)
+                    print('[delete] ...index: 3; label: %s' % object)
+                    self.draw_image = self.draw_rectangle(image.copy(), label_list)
+                if k == ord('$'):
+                    print('======================================================')
+                    object = label_list.pop(3)
+                    print('[delete] ...index: 4; label: %s' % object)
+                    self.draw_image = self.draw_rectangle(image.copy(), label_list)
+                if k == ord('%'):
+                    print('======================================================')
+                    object = label_list.pop(4)
+                    print('[delete] ...index: 5; label: %s' % object)
+                    self.draw_image = self.draw_rectangle(image.copy(), label_list)
+
+            except Exception:
+                msg = traceback.format_exc()
+                print msg
 
         return
 
