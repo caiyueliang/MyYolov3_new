@@ -261,6 +261,17 @@ class SignLabel:
 
         return image
 
+    def write_label(self, label_file, label_list, w, h):
+        write_data(label_file, "", "w+")        # 清空原来的数据
+
+        for label in label_list:
+            save_str = label["class"] + " "
+            save_str += str((float(label["points"][0]) + float(label["points"][2])) / 2 / w) + " "
+            save_str += str((float(label["points"][1]) + float(label["points"][3])) / 2 / h) + " "
+            save_str += str((float(label["points"][2]) - float(label["points"][0])) / w) + " "
+            save_str += str((float(label["points"][3]) - float(label["points"][1])) / h) + "\n"
+            write_data(label_file, save_str, 'a+')
+
     def sign_image(self, image_file, label_file):
         print(image_file)
         print(label_file)
@@ -327,11 +338,18 @@ class SignLabel:
                     print('resign ...')
                     self.car_points = []
                     self.draw_image = self.draw_rectangle(image.copy(), label_list)
-                # 退出，显示下一张
+                # 保存，显示下一张
+                if k == ord('s'):
+                    print('======================================================')
+                    print('[save] ...')
+                    self.write_label(label_file, label_list, w, h)
+                    break
+                # 退出，不保存，显示下一张
                 if k == ord('q'):
                     print('======================================================')
                     print('[next] ...')
                     break
+
                 # 删除标记框
                 if k == ord('!'):
                     print('======================================================')
