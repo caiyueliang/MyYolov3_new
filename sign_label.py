@@ -410,6 +410,9 @@ if __name__ == '__main__':
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/daozha_1/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/daozha_2/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/daozha_3/", process_all=True)
-    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_1/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_1/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_2/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_3/", process_all=True)
+    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/ketuo_1/", process_all=True)
 
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=False)
