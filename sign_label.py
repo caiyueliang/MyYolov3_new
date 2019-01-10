@@ -292,7 +292,7 @@ class SignLabel:
         while True:
             cv2.imshow('sign_image', self.draw_image)
 
-            # 保存这张图片
+            # 保存车牌标记框
             k = cv2.waitKey(1) & 0xFF
             if k == ord('1'):
                 print('[append] class 0: car plate ...')
@@ -301,6 +301,7 @@ class SignLabel:
                 label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1], self.car_points[1][0], self.car_points[1][1])
                 self.car_points = []
                 self.draw_image = self.draw_rectangle(image.copy(), label_list)
+            # 保存车辆标记框
             if k == ord('2'):
                 print('[append] class 1: car ...')
                 label_list.append(dict())
@@ -308,6 +309,16 @@ class SignLabel:
                 label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1], self.car_points[1][0], self.car_points[1][1])
                 self.car_points = []
                 self.draw_image = self.draw_rectangle(image.copy(), label_list)
+            # 删除标记框
+            if k == ord('!') or k == ord('@') or k == ord('#') or k == ord('$') or k == ord('%') or \
+               k == ord('^') or k == ord('&') or k == ord('*') or k == ord('(') or k == ord(')'):
+                
+            # 重新加载图片
+            if k == ord('r'):
+                print('resign ...')
+                self.car_points = []
+                self.draw_image = self.draw_rectangle(image.copy(), label_list)
+            # 退出，显示下一张
             if k == ord('q'):
                 print('[next] ...')
                 break
