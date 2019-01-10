@@ -58,7 +58,7 @@ def read_data(file_name, flag):
         return f.read()
 
 
-class SignCarLabel:
+class SignLabel:
     def __init__(self, root_dir, image_dir, label_file, index_file, copy_dir, copy_file):
         self.img_files = get_files(os.path.join(root_dir, image_dir))
         self.image_dir = image_dir
