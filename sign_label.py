@@ -59,27 +59,29 @@ def read_data(file_name, flag):
 
 
 class SignLabel:
-    def __init__(self, root_dir, image_dir, label_file, index_file, copy_dir, copy_file):
-        self.img_files = get_files(os.path.join(root_dir, image_dir))
-        self.image_dir = image_dir
-        self.label_file = label_file
+    def __init__(self):
+    # def __init__(self, root_dir, image_dir, label_file, index_file, copy_dir, copy_file):
+        # self.img_files = get_files(os.path.join(root_dir, image_dir))
+        # self.image_dir = image_dir
+        # self.label_file = label_file
         self.car_points = []
-        self.index_file = index_file
-        self.copy_dir = copy_dir
-        self.copy_file = copy_file
+        self.draw_image = None
+        # self.index_file = index_file
+        # self.copy_dir = copy_dir
+        # self.copy_file = copy_file
 
-        print("[len] ", len(self.img_files))
+        # print("[len] ", len(self.img_files))
         return
 
     def mouse_click_events(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-            cv2.circle(self.img, (x, y), 3, (0, 0, 255), -1)
+            cv2.circle(self.draw_image, (x, y), 3, (0, 0, 255), -1)
             print('click: [%d, %d]' % (x, y))
             self.car_points.append((x, y))
 
             if len(self.car_points) % 2 == 0:
-                cv2.rectangle(self.img, self.car_points[len(self.car_points)-2], self.car_points[len(self.car_points)-1],
-                              (0, 255, 0), 2)
+                cv2.rectangle(self.draw_image, self.car_points[len(self.car_points)-2], self.car_points[len(self.car_points)-1],
+                              (0, 0, 255), 2)
 
     # def sign_start(self, restart=False):
     #     times = 1
@@ -246,12 +248,11 @@ class SignLabel:
                 if '.txt' not in file:
                     self.show_image(os.path.join(root, file))
 
-
     # ============================================================================================================
     def draw_rectangle(self, image, label_list):
         # print(label_list)
         for index, label in enumerate(label_list):
-            print index, label
+            print (index + 1), label
             if int(label["class"]) == 0:
                 cv2.rectangle(image, (label["points"][0], label["points"][1]), (label["points"][2], label["points"][3]), (0, 255, 0), 2)
             elif int(label["class"]) == 1:
@@ -259,10 +260,12 @@ class SignLabel:
 
         return image
 
-
     def sign_image(self, image_file, label_file):
         print(image_file)
         print(label_file)
+
+        cv2.namedWindow('sign_image')
+        cv2.setMouseCallback('sign_image', self.mouse_click_events)    # 鼠标事件绑定
 
         image = cv2.imread(image_file)
         h, w, c = image.shape
@@ -284,21 +287,32 @@ class SignLabel:
             label_list[-1]["class"] = temp_list[0]
             label_list[-1]["points"] = (int(x1), int(y1), int(x2), int(y2))
 
-        draw_image = self.draw_rectangle(image.copy(), label_list)
+        self.draw_image = self.draw_rectangle(image.copy(), label_list)
 
         while True:
-            cv2.imshow('show_image', draw_image)
+            cv2.imshow('sign_image', self.draw_image)
 
             # 保存这张图片
             k = cv2.waitKey(1) & 0xFF
             if k == ord('1'):
+                print('[append] class 0: car plate ...')
                 label_list.append(dict())
                 label_list[-1]["class"] = '0'
-                label_list[-1]["points"] = (int(x1), int(y1), int(x2), int(y2))
+                label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1], self.car_points[1][0], self.car_points[1][1])
+                self.car_points = []
+                self.draw_image = self.draw_rectangle(image.copy(), label_list)
             if k == ord('2'):
+                print('[append] class 1: car ...')
+                label_list.append(dict())
+                label_list[-1]["class"] = '1'
+                label_list[-1]["points"] = (self.car_points[0][0], self.car_points[0][1], self.car_points[1][0], self.car_points[1][1])
+                self.car_points = []
+                self.draw_image = self.draw_rectangle(image.copy(), label_list)
+            if k == ord('q'):
+                print('[next] ...')
+                break
 
         return
-
 
     def sign_images(self, root_path, process_all=True):
         print('process_all: %s' % process_all)
@@ -322,9 +336,10 @@ if __name__ == '__main__':
     # show_image("../Data/yolo/yolo_data_new/car_detect_train/daozha_1/480466_闽DF3N37.jpg")
     # show_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/")
 
-    sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=True)
+    sign_label = SignLabel()
+    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=True)
 
-    sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=False)
+    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=False)
 
     # root_dir = '../Data/yolo/yolo_data_new/car_detect_train/'
     # copy_dir = '../Data/yolo/yolo_data_new/car_detect_test/'
