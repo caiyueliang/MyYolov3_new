@@ -212,8 +212,9 @@ class SignCarLabel:
         return
 
 
+# ============================================================================================================
 def show_image(image_file):
-    label_file = image_file.replace('.jpg', '.txt').replace('.png', '.txt')
+    label_file = image_file.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')
     print(image_file)
     print(label_file)
 
@@ -248,9 +249,27 @@ def show_images(root_path):
                 show_image(os.path.join(root, file))
 
 
+# ============================================================================================================
+def sign_images(root_path, process_all=True):
+    for root, dirs, files in os.walk(root_path):
+        for file in files:
+            if '.txt' not in file:
+                process_flag = True
+
+                # 只处理未处理过的
+                if os.path.exists(file.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')) \
+                        and process_all is False:
+                    process_flag = False
+
+                if process_flag is True:
+                    show_image(os.path.join(root, file))
+
+
 if __name__ == '__main__':
     # show_image("../Data/yolo/yolo_data_new/car_detect_train/daozha_1/480466_闽DF3N37.jpg")
-    show_images("../Data/yolo/yolo_data_new/car_detect_train/")
+    # show_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/")
+
+    sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=False)
 
     # root_dir = '../Data/yolo/yolo_data_new/car_detect_train/'
     # copy_dir = '../Data/yolo/yolo_data_new/car_detect_test/'
