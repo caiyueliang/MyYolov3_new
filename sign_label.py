@@ -81,193 +81,248 @@ class SignCarLabel:
                 cv2.rectangle(self.img, self.car_points[len(self.car_points)-2], self.car_points[len(self.car_points)-1],
                               (0, 255, 0), 2)
 
-    def sign_start(self, restart=False):
-        times = 1
+    # def sign_start(self, restart=False):
+    #     times = 1
+    #
+    #     mkdir_if_not_exist(os.path.join(self.copy_dir, self.image_dir))
+    #
+    #     cv2.namedWindow('sign_image')
+    #     cv2.setMouseCallback('sign_image', self.mouse_click_events)    # 鼠标事件绑定
+    #
+    #     if restart is False:
+    #         try:
+    #             start_i = int(read_data(self.index_file, 'r'))
+    #             print('start_index: ' + str(start_i))
+    #         except Exception, e:
+    #             print e
+    #             start_i = 0
+    #     else:
+    #         start_i = 0
+    #
+    #     # for img_file in self.img_files:
+    #     while start_i < len(self.img_files):
+    #         print('[total] %d; [index] %d; [name] %s' % (len(self.img_files), start_i, self.img_files[start_i]))
+    #
+    #         self.img = cv2.imread(self.img_files[start_i])
+    #         print(self.img.shape)
+    #         self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0]*times))
+    #         print(self.img.shape)
+    #         cv2.imshow('sign_image', self.img)
+    #
+    #         while True:
+    #             cv2.imshow('sign_image', self.img)
+    #
+    #             # 保存这张图片
+    #             k = cv2.waitKey(1) & 0xFF
+    #             if k == ord('s') or k == ord('1'):
+    #                 print('save ...')
+    #                 data = self.img_files[start_i] + " " + str(len(self.car_points) / 2)
+    #                 for i in range(len(self.car_points) / 2):
+    #                     data += ' ' + str(self.car_points[2*i][0]/float(times)) + \
+    #                             ' ' + str(self.car_points[2*i][1]/float(times)) + \
+    #                             ' ' + str((self.car_points[2*i+1][0]-self.car_points[2*i][0])/float(times)) + \
+    #                             ' ' + str((self.car_points[2*i+1][1]-self.car_points[2*i][1])/float(times)) + \
+    #                             ' 1'
+    #
+    #                 # for (x, y) in self.car_points:
+    #                 #     data += ' ' + str(x/float(times)) + ' ' + str(y/float(times))
+    #                 data += '\n'
+    #
+    #                 write_data(self.label_file, data, 'a+')
+    #                 start_i += 1
+    #                 write_data(self.index_file, str(start_i), 'w')
+    #                 self.car_points = []
+    #                 break
+    #
+    #             if k == ord('2'):
+    #                 print('save and copy ...')
+    #                 data = self.img_files[start_i] + " " + str(len(self.car_points) / 2)
+    #                 for i in range(len(self.car_points) / 2):
+    #                     data += ' ' + str(self.car_points[2 * i][0] / float(times)) + \
+    #                             ' ' + str(self.car_points[2 * i][1] / float(times)) + \
+    #                             ' ' + str((self.car_points[2 * i + 1][0] - self.car_points[2 * i][0]) / float(times)) + \
+    #                             ' ' + str((self.car_points[2 * i + 1][1] - self.car_points[2 * i][1]) / float(times)) + \
+    #                             ' 1'
+    #
+    #                 data += '\n'
+    #
+    #                 write_data(self.label_file, data, 'a+')
+    #                 write_data(self.copy_file, data, 'a+')
+    #                 shutil.copy(self.img_files[start_i], os.path.join(self.copy_dir, self.image_dir,
+    #                                                                   self.img_files[start_i].split('/')[-1]))
+    #
+    #                 start_i += 1
+    #                 write_data(self.index_file, str(start_i), 'w')
+    #                 self.car_points = []
+    #                 break
+    #
+    #             if k == ord('d'):
+    #                 print('delete ...')
+    #                 exe_cmd('rm -r ' + self.img_files[start_i])
+    #                 self.img_files.pop(start_i)
+    #
+    #                 print('[total] %d; [index] %d; [name] %s' % (len(self.img_files), start_i, self.img_files[start_i]))
+    #                 self.img = cv2.imread(self.img_files[start_i])
+    #                 print(self.img.shape)
+    #                 self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0] * times))
+    #                 print(self.img.shape)
+    #                 cv2.imshow('sign_image', self.img)
+    #                 self.car_points = []
+    #
+    #             # 重新加载图片
+    #             if k == ord('r'):
+    #                 print('resign ...')
+    #                 self.img = cv2.imread(self.img_files[start_i])
+    #                 print(self.img.shape)
+    #                 self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0]*times))
+    #                 print(self.img.shape)
+    #                 cv2.imshow('sign_image', self.img)
+    #                 self.car_points = []
+    #
+    #             if k == ord('c'):
+    #                 print('change size ...')
+    #                 if times == 2:
+    #                     times = 1
+    #                 else:
+    #                     times = 2
+    #                 self.img = cv2.imread(self.img_files[start_i])
+    #                 print(self.img.shape)
+    #                 self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0] * times))
+    #                 print(self.img.shape)
+    #                 cv2.imshow('sign_image', self.img)
+    #                 self.car_points = []
 
-        mkdir_if_not_exist(os.path.join(self.copy_dir, self.image_dir))
+    # def clean_start(self, root_dir, label_path, restart=False):
+    #     with open(label_path, 'r') as f:
+    #         lines = f.readlines()
+    #         for line in lines:
+    #             str_list = line.split(' ')
+    #             image_path = os.path.join(root_dir, str_list[0])
+    #             img = cv2.imread(image_path)
+    #             while True:
+    #                 cv2.imshow('clean_image', img)
+    #
+    #                 k = cv2.waitKey(1) & 0xFF
+    #                 if k == ord('y'):
+    #                     print('save ...')
+    #                     write_data(os.path.join('.', label_path.split('/')[-1]), line, 'a+')
+    #                     break
+    #                 if k == ord('n'):
+    #                     break
+    #     return
 
-        cv2.namedWindow('sign_image')
-        cv2.setMouseCallback('sign_image', self.mouse_click_events)    # 鼠标事件绑定
+    # ============================================================================================================
+    def show_image(self, image_file):
+        label_file = image_file.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')
+        print(image_file)
+        print(label_file)
 
-        if restart is False:
-            try:
-                start_i = int(read_data(self.index_file, 'r'))
-                print('start_index: ' + str(start_i))
-            except Exception, e:
-                print e
-                start_i = 0
-        else:
-            start_i = 0
+        image = cv2.imread(image_file)
+        h, w, c = image.shape
+        print('(h, w, c): (%d, %d, %d)' % (h, w, c))
 
-        # for img_file in self.img_files:
-        while start_i < len(self.img_files):
-            print('[total] %d; [index] %d; [name] %s' % (len(self.img_files), start_i, self.img_files[start_i]))
+        with open(label_file, 'r') as file:
+            label_list = file.readlines()
 
-            self.img = cv2.imread(self.img_files[start_i])
-            print(self.img.shape)
-            self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0]*times))
-            print(self.img.shape)
-            cv2.imshow('sign_image', self.img)
+        for label in label_list:
+            temp_list = label.rstrip().split(' ')
+            x1 = float(temp_list[1]) * w - (float(temp_list[3]) * w / 2)
+            y1 = float(temp_list[2]) * h - (float(temp_list[4]) * h / 2)
 
-            while True:
-                cv2.imshow('sign_image', self.img)
+            x2 = float(temp_list[1]) * w + (float(temp_list[3]) * w / 2)
+            y2 = float(temp_list[2]) * h + (float(temp_list[4]) * h / 2)
 
-                # 保存这张图片
-                k = cv2.waitKey(1) & 0xFF
-                if k == ord('s') or k == ord('1'):
-                    print('save ...')
-                    data = self.img_files[start_i] + " " + str(len(self.car_points) / 2)
-                    for i in range(len(self.car_points) / 2):
-                        data += ' ' + str(self.car_points[2*i][0]/float(times)) + \
-                                ' ' + str(self.car_points[2*i][1]/float(times)) + \
-                                ' ' + str((self.car_points[2*i+1][0]-self.car_points[2*i][0])/float(times)) + \
-                                ' ' + str((self.car_points[2*i+1][1]-self.car_points[2*i][1])/float(times)) + \
-                                ' 1'
+            if int(temp_list[0]) == 0:
+                cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+            elif int(temp_list[0]) == 1:
+                cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 255), 2)
 
-                    # for (x, y) in self.car_points:
-                    #     data += ' ' + str(x/float(times)) + ' ' + str(y/float(times))
-                    data += '\n'
+        cv2.imshow('show_image', image)
+        cv2.waitKey(0)
 
-                    write_data(self.label_file, data, 'a+')
-                    start_i += 1
-                    write_data(self.index_file, str(start_i), 'w')
-                    self.car_points = []
-                    break
+    def show_images(self, root_path):
+        for root, dirs, files in os.walk(root_path):
+            for file in files:
+                if '.txt' not in file:
+                    self.show_image(os.path.join(root, file))
 
-                if k == ord('2'):
-                    print('save and copy ...')
-                    data = self.img_files[start_i] + " " + str(len(self.car_points) / 2)
-                    for i in range(len(self.car_points) / 2):
-                        data += ' ' + str(self.car_points[2 * i][0] / float(times)) + \
-                                ' ' + str(self.car_points[2 * i][1] / float(times)) + \
-                                ' ' + str((self.car_points[2 * i + 1][0] - self.car_points[2 * i][0]) / float(times)) + \
-                                ' ' + str((self.car_points[2 * i + 1][1] - self.car_points[2 * i][1]) / float(times)) + \
-                                ' 1'
 
-                    data += '\n'
+    # ============================================================================================================
+    def draw_rectangle(self, image, label_list):
+        # print(label_list)
+        for index, label in enumerate(label_list):
+            print index, label
+            if int(label["class"]) == 0:
+                cv2.rectangle(image, (label["points"][0], label["points"][1]), (label["points"][2], label["points"][3]), (0, 255, 0), 2)
+            elif int(label["class"]) == 1:
+                cv2.rectangle(image, (label["points"][0], label["points"][1]), (label["points"][2], label["points"][3]), (0, 255, 255), 2)
 
-                    write_data(self.label_file, data, 'a+')
-                    write_data(self.copy_file, data, 'a+')
-                    shutil.copy(self.img_files[start_i], os.path.join(self.copy_dir, self.image_dir,
-                                                                      self.img_files[start_i].split('/')[-1]))
+        return image
 
-                    start_i += 1
-                    write_data(self.index_file, str(start_i), 'w')
-                    self.car_points = []
-                    break
 
-                if k == ord('d'):
-                    print('delete ...')
-                    exe_cmd('rm -r ' + self.img_files[start_i])
-                    self.img_files.pop(start_i)
+    def sign_image(self, image_file, label_file):
+        print(image_file)
+        print(label_file)
 
-                    print('[total] %d; [index] %d; [name] %s' % (len(self.img_files), start_i, self.img_files[start_i]))
-                    self.img = cv2.imread(self.img_files[start_i])
-                    print(self.img.shape)
-                    self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0] * times))
-                    print(self.img.shape)
-                    cv2.imshow('sign_image', self.img)
-                    self.car_points = []
+        image = cv2.imread(image_file)
+        h, w, c = image.shape
+        print('(h, w, c): (%d, %d, %d)' % (h, w, c))
 
-                # 重新加载图片
-                if k == ord('r'):
-                    print('resign ...')
-                    self.img = cv2.imread(self.img_files[start_i])
-                    print(self.img.shape)
-                    self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0]*times))
-                    print(self.img.shape)
-                    cv2.imshow('sign_image', self.img)
-                    self.car_points = []
+        with open(label_file, 'r') as file:
+            label_list_str = file.readlines()
 
-                if k == ord('c'):
-                    print('change size ...')
-                    if times == 2:
-                        times = 1
-                    else:
-                        times = 2
-                    self.img = cv2.imread(self.img_files[start_i])
-                    print(self.img.shape)
-                    self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0] * times))
-                    print(self.img.shape)
-                    cv2.imshow('sign_image', self.img)
-                    self.car_points = []
+        label_list = list()
+        for label in label_list_str:
+            temp_list = label.rstrip().split(' ')
+            x1 = float(temp_list[1]) * w - (float(temp_list[3]) * w / 2)
+            y1 = float(temp_list[2]) * h - (float(temp_list[4]) * h / 2)
 
-    def clean_start(self, root_dir, label_path, restart=False):
-        with open(label_path, 'r') as f:
-            lines = f.readlines()
-            for line in lines:
-                str_list = line.split(' ')
-                image_path = os.path.join(root_dir, str_list[0])
-                img = cv2.imread(image_path)
-                while True:
-                    cv2.imshow('clean_image', img)
+            x2 = float(temp_list[1]) * w + (float(temp_list[3]) * w / 2)
+            y2 = float(temp_list[2]) * h + (float(temp_list[4]) * h / 2)
 
-                    k = cv2.waitKey(1) & 0xFF
-                    if k == ord('y'):
-                        print('save ...')
-                        write_data(os.path.join('.', label_path.split('/')[-1]), line, 'a+')
-                        break
-                    if k == ord('n'):
-                        break
+            label_list.append(dict())
+            label_list[-1]["class"] = temp_list[0]
+            label_list[-1]["points"] = (int(x1), int(y1), int(x2), int(y2))
+
+        draw_image = self.draw_rectangle(image.copy(), label_list)
+
+        while True:
+            cv2.imshow('show_image', draw_image)
+
+            # 保存这张图片
+            k = cv2.waitKey(1) & 0xFF
+            if k == ord('1'):
+                label_list.append(dict())
+                label_list[-1]["class"] = '0'
+                label_list[-1]["points"] = (int(x1), int(y1), int(x2), int(y2))
+            if k == ord('2'):
+
         return
 
 
-# ============================================================================================================
-def show_image(image_file):
-    label_file = image_file.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')
-    print(image_file)
-    print(label_file)
+    def sign_images(self, root_path, process_all=True):
+        print('process_all: %s' % process_all)
 
-    image = cv2.imread(image_file)
-    h, w, c = image.shape
-    print('(h, w, c): (%d, %d, %d)' % (h, w, c))
+        for root, dirs, files in os.walk(root_path):
+            for file in files:
+                if '.txt' not in file:
+                    process_flag = True
 
-    with open(label_file, 'r') as file:
-        label_list = file.readlines()
+                    # 只处理未处理过的
+                    label_name = file.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')
+                    if os.path.exists(os.path.join(root, label_name)) \
+                            and process_all is False:
+                        process_flag = False
 
-    for label in label_list:
-        temp_list = label.rstrip().split(' ')
-        x1 = float(temp_list[1]) * w - (float(temp_list[3]) * w / 2)
-        y1 = float(temp_list[2]) * h - (float(temp_list[4]) * h / 2)
-
-        x2 = float(temp_list[1]) * w + (float(temp_list[3]) * w / 2)
-        y2 = float(temp_list[2]) * h + (float(temp_list[4]) * h / 2)
-
-        if int(temp_list[0]) == 0:
-            cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-        elif int(temp_list[0]) == 1:
-            cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 255), 2)
-
-    cv2.imshow('show_image', image)
-    cv2.waitKey(0)
-
-
-def show_images(root_path):
-    for root, dirs, files in os.walk(root_path):
-        for file in files:
-            if '.txt' not in file:
-                show_image(os.path.join(root, file))
-
-
-# ============================================================================================================
-def sign_images(root_path, process_all=True):
-    for root, dirs, files in os.walk(root_path):
-        for file in files:
-            if '.txt' not in file:
-                process_flag = True
-
-                # 只处理未处理过的
-                if os.path.exists(file.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')) \
-                        and process_all is False:
-                    process_flag = False
-
-                if process_flag is True:
-                    show_image(os.path.join(root, file))
+                    if process_flag is True:
+                        self.sign_image(os.path.join(root, file), os.path.join(root, label_name))
 
 
 if __name__ == '__main__':
     # show_image("../Data/yolo/yolo_data_new/car_detect_train/daozha_1/480466_闽DF3N37.jpg")
     # show_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/")
+
+    sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=True)
 
     sign_images(root_path="../Data/yolo/yolo_data_new_1/car_detect_train/", process_all=False)
 
