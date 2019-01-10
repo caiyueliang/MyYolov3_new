@@ -177,5 +177,5 @@ if __name__ == '__main__':
     # post_image_base64_baidu('./112.jpg', '24.486cc9beb6b983cc636628803b3618fa.2592000.1547862801.282335-15215859')
 
     # 自动标记
-    auto_sign('../../Data/yolo_data_new/car_detect_train/', 'image_path.txt', 'car_loc_label.txt')
-    # auto_sign('../../Data/yolo_data_new/car_detect_test/', 'image_path.txt', 'car_loc_label.txt')
+    auto_sign('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'car_loc_label.txt')
+    auto_sign('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'car_loc_label.txt')
