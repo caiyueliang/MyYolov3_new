@@ -111,6 +111,7 @@ class ModuleTrain:
 
     def train(self):
         for epoch in range(self.opt.epochs):
+            print("\n=========================================================")
             self.model.train()
 
             x_loss = 0.0
@@ -242,7 +243,7 @@ class ModuleTrain:
         time_end = time.time()
         time_avg = float(time_end - time_start) / float(len(self.test_loader.dataset))
         avg_loss = test_loss / len(self.test_loader)
-        print('[Test] avg_loss: {:.5f} time: {:.6f}\n'.format(avg_loss, time_avg))
+        print('[Test] avg_loss: {:.5f} time: {:.6f}'.format(avg_loss, time_avg))
         return avg_loss
 
 
