@@ -24,7 +24,7 @@ def parse_argvs():
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
     parser.add_argument("--decay_epoch", type=int, default=60, help="decay_epoch")
-    parser.add_argument("--lr", type=float, default=0.0001, help="lr")
+    parser.add_argument("--lr", type=float, default=0.001, help="lr")
     # parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
     parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
     # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
@@ -167,18 +167,13 @@ class ModuleTrain:
                 self.model.save_weights(best_model_file)  # 保存最好的模型
 
         self.model.save_weights(self.opt.checkpoint_name)  # 保存最好的模型
-        # if epoch % self.opt.checkpoint_interval == 0:
-        #     self.model.save_weights("%s/%d.weights" % (self.opt.checkpoint_dir, epoch))
 
     def test(self):
         self.model.eval()
-
-        test_loss = 0
+        test_loss = 0.0
 
         time_start = time.time()
         # 测试集
-        # for data, target in test_loader:
-        # for images, loc_targets, conf_targets in self.test_loader:
         for batch_i, (_, imgs, targets) in enumerate(self.test_loader):
             imgs = Variable(imgs.type(self.tensor))
             targets = Variable(targets.type(self.tensor), requires_grad=False)
