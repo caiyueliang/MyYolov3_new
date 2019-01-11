@@ -90,6 +90,7 @@ class ModuleTrain:
         # model.load_weights(opt.weights_path)
         # 加载模型
         if os.path.exists(self.opt.checkpoint_name) and not self.re_train:
+            print('[load model] ... %s' % self.opt.checkpoint_name)
             self.model.load_weights(self.opt.checkpoint_name)
 
         self.model.apply(weights_init_normal)
