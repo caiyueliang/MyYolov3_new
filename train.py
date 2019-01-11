@@ -123,7 +123,7 @@ class ModuleTrain:
             avg_precision = 0.0
 
             train_loss = 0.0
-            
+
             if epoch >= self.decay_epoch and epoch % self.decay_epoch == 0:
                 self.learning_rate *= 0.1
             for param_group in self.optimizer.param_groups:
@@ -178,7 +178,7 @@ class ModuleTrain:
             cls_loss /= len(self.train_loader)
             avg_recall /= len(self.train_loader)
             avg_precision /= len(self.train_loader)
-            print ('[Train] Epoch [%d/%d] average_loss: %.5f lr: %.6f [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f recall: %.5f, precision: %.5f]' %
+            print ('Epoch [%d/%d] loss: %.5f lr: %.6f [x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f recall: %.5f, precision: %.5f]' %
                    (epoch + 1,
                     self.opt.epochs,
                     train_loss,
