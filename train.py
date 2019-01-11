@@ -77,6 +77,7 @@ class ModuleTrain:
 
         # Get data configuration
         self.train_path = self.opt.train_path
+        self.test_path = self.opt.test_path
         self.image_file = self.opt.image_file
 
         # Get hyper parameters
@@ -101,22 +102,24 @@ class ModuleTrain:
         self.tensor = torch.cuda.FloatTensor if self.cuda else torch.FloatTensor
 
         # Get dataloader
-        self.dataloader = torch.utils.data.DataLoader(ListDataset(self.train_path, self.image_file), shuffle=False,
-                                                      batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
+        self.train_loader = torch.utils.data.DataLoader(ListDataset(self.train_path, self.image_file), shuffle=True,
+                                                        batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
+        self.test_loader = torch.utils.data.DataLoader(ListDataset(self.test_path, self.image_file), shuffle=False,
+                                                       batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
 
         self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=self.learning_rate)
 
     def train(self):
-        self.model.train()
-
         for epoch in range(self.opt.epochs):
+            self.model.train()
+
             train_loss = 0.0
             if epoch >= self.decay_epoch and epoch % self.decay_epoch == 0:
                 self.learning_rate *= 0.1
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = self.learning_rate
 
-            for batch_i, (_, imgs, targets) in enumerate(self.dataloader):
+            for batch_i, (_, imgs, targets) in enumerate(self.train_loader):
                 imgs = Variable(imgs.type(self.tensor))
                 targets = Variable(targets.type(self.tensor), requires_grad=False)
 
@@ -128,28 +131,30 @@ class ModuleTrain:
                 if self.opt.detail_log:
                     print("[Epoch %d/%d, Batch %d/%d] [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f,"
                           " total %.5f, recall: %.5f, precision: %.5f]" % (
-                            epoch,
-                            self.opt.epochs,
-                            batch_i,
-                            len(self.dataloader),
-                            self.model.losses["x"],
-                            self.model.losses["y"],
-                            self.model.losses["w"],
-                            self.model.losses["h"],
-                            self.model.losses["conf"],
-                            self.model.losses["cls"],
-                            loss.item(),
-                            self.model.losses["recall"],
-                            self.model.losses["precision"],)
+                                epoch,
+                                self.opt.epochs,
+                                batch_i,
+                                len(self.train_loader),
+                                self.model.losses["x"],
+                                self.model.losses["y"],
+                                self.model.losses["w"],
+                                self.model.losses["h"],
+                                self.model.losses["conf"],
+                                self.model.losses["cls"],
+                                loss.item(),
+                                self.model.losses["recall"],
+                                self.model.losses["precision"],
+                                )
                           )
 
                 train_loss += loss.item()
                 self.model.seen += imgs.size(0)
 
-            train_loss /= len(self.dataloader)
+            train_loss /= len(self.train_loader)
             print ('[Train] Epoch [%d/%d] average_loss: %.6f lr: %.6f' % (epoch + 1, self.opt.epochs, train_loss, self.learning_rate))
 
-            if self.best_loss > train_loss:
+            test_loss = self.test()
+            if self.best_loss > test_loss:
                 self.best_loss = train_loss
                 str_list = self.opt.checkpoint_name.split('.')
                 best_model_file = ""
@@ -164,6 +169,45 @@ class ModuleTrain:
         self.model.save_weights(self.opt.checkpoint_name)  # 保存最好的模型
         # if epoch % self.opt.checkpoint_interval == 0:
         #     self.model.save_weights("%s/%d.weights" % (self.opt.checkpoint_dir, epoch))
+
+    def test(self):
+        self.model.eval()
+
+        test_loss = 0
+
+        time_start = time.time()
+        # 测试集
+        # for data, target in test_loader:
+        # for images, loc_targets, conf_targets in self.test_loader:
+        for batch_i, (_, imgs, targets) in enumerate(self.test_loader):
+            imgs = Variable(imgs.type(self.tensor))
+            targets = Variable(targets.type(self.tensor), requires_grad=False)
+
+            loss = self.model(imgs, targets)
+            test_loss += loss.item()
+
+            if self.opt.detail_log:
+                print("[Batch %d/%d] [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f,"
+                      " total %.5f, recall: %.5f, precision: %.5f]" % (
+                            batch_i,
+                            len(self.train_loader),
+                            self.model.losses["x"],
+                            self.model.losses["y"],
+                            self.model.losses["w"],
+                            self.model.losses["h"],
+                            self.model.losses["conf"],
+                            self.model.losses["cls"],
+                            loss.item(),
+                            self.model.losses["recall"],
+                            self.model.losses["precision"],
+                            )
+                      )
+
+        time_end = time.time()
+        time_avg = float(time_end - time_start) / float(len(self.test_loader.dataset))
+        avg_loss = test_loss / len(self.test_loader)
+        print('[Test] avg_loss: {:.6f} time: {:.6f}\n'.format(avg_loss, time_avg))
+        return avg_loss
 
 
 if __name__ == '__main__':
