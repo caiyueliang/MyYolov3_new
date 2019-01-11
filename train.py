@@ -197,7 +197,7 @@ class ModuleTrain:
 
             test_loss = self.test()
             if self.best_loss > test_loss:
-                self.best_loss = train_loss
+                self.best_loss = test_loss
                 str_list = self.opt.checkpoint_name.split('.')
                 best_model_file = ""
                 for str_index in range(len(str_list)):

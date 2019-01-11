@@ -138,9 +138,9 @@ class YOLOLayer(nn.Module):
         self.ce_loss = nn.CrossEntropyLoss()                        # Class loss        交叉熵
 
     def forward(self, x, targets=None):
-        nA = self.num_anchors
-        nB = x.size(0)
-        nG = x.size(2)
+        nA = self.num_anchors           # 锚框个数：3
+        nB = x.size(0)                  # batch size大小：16
+        nG = x.size(2)                  # 矩阵大小：13
         stride = self.image_dim / nG
         # print(x.size())
         # print(nA)
@@ -153,15 +153,18 @@ class YOLOLayer(nn.Module):
         LongTensor = torch.cuda.LongTensor if x.is_cuda else torch.LongTensor
         ByteTensor = torch.cuda.ByteTensor if x.is_cuda else torch.ByteTensor
 
+        # 输入x形状如(16, 21, 13, 13)
+        # 重新变换成矩阵维度为(nB, nA, self.bbox_attrs, nG, nG)，如(16, 3, 7, 13, 13)
+        # 再调整成(nB, nA, nG, nG, self.bbox_attrs)，如(16, 3, 13, 13, 7)
         prediction = x.view(nB, nA, self.bbox_attrs, nG, nG).permute(0, 1, 3, 4, 2).contiguous()
 
         # Get outputs
-        x = torch.sigmoid(prediction[..., 0])  # Center x
-        y = torch.sigmoid(prediction[..., 1])  # Center y
-        w = prediction[..., 2]  # Width
-        h = prediction[..., 3]  # Height
-        pred_conf = torch.sigmoid(prediction[..., 4])  # Conf
-        pred_cls = torch.sigmoid(prediction[..., 5:])  # Cls pred.
+        x = torch.sigmoid(prediction[..., 0])           # Center x
+        y = torch.sigmoid(prediction[..., 1])           # Center y
+        w = prediction[..., 2]                          # Width
+        h = prediction[..., 3]                          # Height
+        pred_conf = torch.sigmoid(prediction[..., 4])   # Conf
+        pred_cls = torch.sigmoid(prediction[..., 5:])   # Cls pred.
 
         # Calculate offsets for each grid
         grid_x = torch.arange(nG).repeat(nG, 1).view([1, 1, nG, nG]).type(FloatTensor)
