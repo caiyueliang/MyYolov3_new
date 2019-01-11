@@ -113,7 +113,17 @@ class ModuleTrain:
         for epoch in range(self.opt.epochs):
             self.model.train()
 
+            x_loss = 0.0
+            y_loss = 0.0
+            w_loss = 0.0
+            h_loss = 0.0
+            conf_loss = 0.0
+            cls_loss = 0.0
+            avg_recall = 0.0
+            avg_precision = 0.0
+
             train_loss = 0.0
+            
             if epoch >= self.decay_epoch and epoch % self.decay_epoch == 0:
                 self.learning_rate *= 0.1
             for param_group in self.optimizer.param_groups:
@@ -147,11 +157,42 @@ class ModuleTrain:
                                 )
                           )
 
+                x_loss += self.model.losses["x"]
+                y_loss += self.model.losses["y"]
+                w_loss += self.model.losses["w"]
+                h_loss += self.model.losses["h"]
+                conf_loss += self.model.losses["conf"]
+                cls_loss += self.model.losses["cls"]
+                avg_recall += self.model.losses["recall"]
+                avg_precision += self.model.losses["precision"]
+
                 train_loss += loss.item()
                 self.model.seen += imgs.size(0)
 
             train_loss /= len(self.train_loader)
-            print ('[Train] Epoch [%d/%d] average_loss: %.6f lr: %.6f' % (epoch + 1, self.opt.epochs, train_loss, self.learning_rate))
+            x_loss /= len(self.train_loader)
+            y_loss /= len(self.train_loader)
+            w_loss /= len(self.train_loader)
+            h_loss /= len(self.train_loader)
+            conf_loss /= len(self.train_loader)
+            cls_loss /= len(self.train_loader)
+            avg_recall /= len(self.train_loader)
+            avg_precision /= len(self.train_loader)
+            print ('[Train] Epoch [%d/%d] average_loss: %.5f lr: %.6f [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f recall: %.5f, precision: %.5f]' %
+                   (epoch + 1,
+                    self.opt.epochs,
+                    train_loss,
+                    self.learning_rate,
+                    x_loss,
+                    y_loss,
+                    w_loss,
+                    h_loss,
+                    conf_loss,
+                    cls_loss,
+                    avg_recall,
+                    avg_precision
+                    )
+                   )
 
             test_loss = self.test()
             if self.best_loss > test_loss:
@@ -201,7 +242,7 @@ class ModuleTrain:
         time_end = time.time()
         time_avg = float(time_end - time_start) / float(len(self.test_loader.dataset))
         avg_loss = test_loss / len(self.test_loader)
-        print('[Test] avg_loss: {:.6f} time: {:.6f}\n'.format(avg_loss, time_avg))
+        print('[Test] avg_loss: {:.5f} time: {:.6f}\n'.format(avg_loss, time_avg))
         return avg_loss
 
 
