@@ -24,6 +24,7 @@ def parse_argvs():
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
     parser.add_argument("--decay_epoch", type=int, default=60, help="decay_epoch")
+    parser.add_argument("--lr", type=float, default=0.0001, help="lr")
     # parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
     parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
     # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
@@ -60,6 +61,7 @@ class ModuleTrain:
         self.re_train = self.opt.re_train
         self.cuda = torch.cuda.is_available() and opt.use_cuda
         self.decay_epoch = self.opt.decay_epoch
+        self.learning_rate = self.opt.lr
 
         try:
             os.makedirs("output")
@@ -79,7 +81,6 @@ class ModuleTrain:
 
         # Get hyper parameters
         self.hyper_params = parse_model_config(opt.model_config_path)[0]
-        self.learning_rate = float(self.hyper_params["learning_rate"])
         self.momentum = float(self.hyper_params["momentum"])
         self.decay = float(self.hyper_params["decay"])
         self.burn_in = int(self.hyper_params["burn_in"])

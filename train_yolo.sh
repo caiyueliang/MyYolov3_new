@@ -1,0 +1,1 @@
+python train.py --epochs 200 --decay_epoch 80 --lr 0.001 --model_config_path config/lpr_yolov3.cfg --checkpoint_name checkpoints/lpr_yolo.weights
