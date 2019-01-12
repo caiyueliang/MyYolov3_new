@@ -271,7 +271,7 @@ class ModuleTrain:
         avg_precision /= len(self.test_loader)
 
         avg_loss = test_loss / len(self.test_loader)
-        print('[Test] avg_loss: %.5f time: %.5f [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f,'
+        print('[Test] loss: %.5f time: %.5f [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f,'
               ' recall: %.5f, precision: %.5f]' % (
                 avg_loss,
                 time_avg,
