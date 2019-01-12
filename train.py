@@ -214,6 +214,15 @@ class ModuleTrain:
         self.model.eval()
         test_loss = 0.0
 
+        x_loss = 0.0
+        y_loss = 0.0
+        w_loss = 0.0
+        h_loss = 0.0
+        conf_loss = 0.0
+        cls_loss = 0.0
+        avg_recall = 0.0
+        avg_precision = 0.0
+
         time_start = time.time()
         # 测试集
         for batch_i, (_, imgs, targets) in enumerate(self.test_loader):
@@ -240,10 +249,41 @@ class ModuleTrain:
                             )
                       )
 
+            x_loss += self.model.losses["x"]
+            y_loss += self.model.losses["y"]
+            w_loss += self.model.losses["w"]
+            h_loss += self.model.losses["h"]
+            conf_loss += self.model.losses["conf"]
+            cls_loss += self.model.losses["cls"]
+            avg_recall += self.model.losses["recall"]
+            avg_precision += self.model.losses["precision"]
+
         time_end = time.time()
         time_avg = float(time_end - time_start) / float(len(self.test_loader.dataset))
+
+        x_loss /= len(self.test_loader)
+        y_loss /= len(self.test_loader)
+        w_loss /= len(self.test_loader)
+        h_loss /= len(self.test_loader)
+        conf_loss /= len(self.test_loader)
+        cls_loss /= len(self.test_loader)
+        avg_recall /= len(self.test_loader)
+        avg_precision /= len(self.test_loader)
+
         avg_loss = test_loss / len(self.test_loader)
-        print('[Test] avg_loss: {:.5f} time: {:.6f}'.format(avg_loss, time_avg))
+        print('[Test] avg_loss: %.5f time: %.5f [Losses: x %.5f, y %.5f, w %.5f, h %.5f, conf %.5f, cls %.5f,'
+              ' recall: %.5f, precision: %.5f]' % (
+                avg_loss,
+                time_avg,
+                x_loss,
+                y_loss,
+                w_loss,
+                h_loss,
+                conf_loss,
+                cls_loss,
+                avg_recall,
+                avg_precision)
+              )
         return avg_loss
 
 
