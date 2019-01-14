@@ -20,14 +20,21 @@ import matplotlib.patches as patches
 from matplotlib.ticker import NullLocator
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--image_folder', type=str, default='data/samples', help='path to dataset')
+parser.add_argument('--image_folder', type=str, default='../Data/yolo/yolo_data_new/detect_test', help='path to dataset')
 parser.add_argument('--config_path', type=str, default='config/yolov3.cfg', help='path to model config file')
 parser.add_argument('--weights_path', type=str, default='weights/yolov3.weights', help='path to weights file')
-parser.add_argument('--class_path', type=str, default='data/coco.names', help='path to class label file')
-parser.add_argument('--conf_thres', type=float, default=0.8, help='object confidence threshold')
+parser.add_argument('--class_num', type=int, default=2, help='class_num')
+
+# parser.add_argument('--image_folder', type=str, default='data/samples', help='path to dataset')
+# parser.add_argument('--config_path', type=str, default='config/lpr_yolov3-tiny.cfg', help='model config file')
+# parser.add_argument('--weights_path', type=str, default='checkpoints/lpr_yolo_tiny_best.weights', help='weights file')
+# parser.add_argument('--class_num', type=int, default=80, help='class_num')
+
+parser.add_argument('--class_path', type=str, default='../Data/yolo/yolo_data_new/lpr.names', help='path to class label file')
+parser.add_argument('--conf_thres', type=float, default=0.1, help='object confidence threshold')
 parser.add_argument('--nms_thres', type=float, default=0.4, help='iou thresshold for non-maximum suppression')
 parser.add_argument('--batch_size', type=int, default=1, help='size of the batches')
-parser.add_argument('--n_cpu', type=int, default=2, help='number of cpu threads to use during batch generation')
+parser.add_argument('--n_cpu', type=int, default=0, help='number of cpu threads to use during batch generation')
 parser.add_argument('--img_size', type=int, default=416, help='size of each image dimension')
 parser.add_argument('--use_cuda', type=bool, default=True, help='whether to use cuda if available')
 opt = parser.parse_args()
@@ -68,8 +75,9 @@ for batch_i, (img_paths, input_imgs) in enumerate(dataloader):
     # Get detections
     with torch.no_grad():
         detections = model(input_imgs)
-        detections = non_max_suppression(detections, 80, opt.conf_thres, opt.nms_thres)
-
+        print detections.size()
+        detections = non_max_suppression(detections, opt.class_num, opt.conf_thres, opt.nms_thres)
+        print detections
 
     # Log progress
     current_time = time.time()

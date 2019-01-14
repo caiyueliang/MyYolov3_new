@@ -46,7 +46,7 @@ def parse_argvs():
     # parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="checkpoint_dir")
     parser.add_argument("--use_cuda", type=bool, default=True, help="whether to use cuda if available")
     parser.add_argument("--re_train", type=bool, default=False, help="re_train")
-    parser.add_argument("--best_loss", type=float, default=10.0, help="best_loss")
+    parser.add_argument("--best_loss", type=float, default=1000.0, help="best_loss")
     parser.add_argument("--detail_log", type=bool, default=False, help="detail_log")
 
     opt = parser.parse_args()
@@ -92,7 +92,8 @@ class ModuleTrain:
         # 加载模型
         if os.path.exists(self.opt.checkpoint_name) and not self.re_train:
             print('[load model] ... %s' % self.opt.checkpoint_name)
-            self.model.load_weights(self.opt.checkpoint_name)
+            # self.model.load_weights(self.opt.checkpoint_name)
+            self.load(self.opt.checkpoint_name)
 
         self.model.apply(weights_init_normal)
 
@@ -108,6 +109,16 @@ class ModuleTrain:
                                                        batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
 
         self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=self.learning_rate)
+
+    def load(self, name):
+        print('[Load model] %s ...' % name)
+        self.model.load_state_dict(torch.load(name))
+        # self.model.load(name)
+
+    def save(self, name):
+        print('[Save model] %s ...' % name)
+        torch.save(self.model.state_dict(), name)
+        # self.model.save(name)
 
     def train(self):
         for epoch in range(self.opt.epochs):
@@ -206,9 +217,11 @@ class ModuleTrain:
                         best_model_file += '_best'
                     if str_index != (len(str_list) - 1):
                         best_model_file += '.'
-                self.model.save_weights(best_model_file)  # 保存最好的模型
+                # self.model.save_weights(best_model_file)      # 保存最好的模型
+                self.save(best_model_file)                      # 保存最好的模型
 
-        self.model.save_weights(self.opt.checkpoint_name)  # 保存最好的模型
+        # self.model.save_weights(self.opt.checkpoint_name)     # 保存模型
+        self.save(self.opt.checkpoint_name)                     # 保存模型
 
     def test(self):
         self.model.eval()
