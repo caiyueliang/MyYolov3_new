@@ -87,7 +87,7 @@ def data_pre_process_1(root_path, old_label_file, class_index):
         print str_list
         image_path = str_list[0]
         print image_path
-        label_path = image_path.replace('.jpg', '.txt').replace('.png', '.txt')
+        label_path = image_path.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')
         print label_path
 
         # target_image_path = os.path.join(root_path, image_path)
@@ -124,12 +124,50 @@ def data_pre_process_1(root_path, old_label_file, class_index):
     return
 
 
+def yolo_to_facebox(root_path, old_label_file, new_label_file):
+    old_label_path = os.path.join(root_path, old_label_file)
+    new_label_path = os.path.join(root_path, new_label_file)
+
+    with open(old_label_path, 'r') as file:
+        label_list = file.readlines()
+
+    for label in label_list:
+        image_path = label.replace('\n', '').rstrip()
+        print('image_path', image_path)
+        label_path = image_path.replace('.jpg', '.txt').replace('.jpeg', '.txt').replace('.png', '.txt')
+        print('label_path', label_path)
+
+        image = cv2.imread(os.path.join(root_path, image_path))
+        h, w, c = image.shape
+        print('(h, w, c): (%d, %d, %d)' % (h, w, c))
+
+        with open(os.path.join(root_path, label_path), 'a+') as file:
+            label_all = file.readlines()
+
+        save_str = image_path + " " + str(len(label_all)) + " "
+        for loc_str in label_all:
+            print('loc_str', loc_str)
+            loc_list = loc_str.rstrip().split(' ')
+            print('loc_list', loc_list)
+            save_str += str((float(loc_list[1]) * w) - (float(loc_list[3]) * w) / 2) + " "
+            save_str += str((float(loc_list[2]) * h) - (float(loc_list[4]) * h) / 2) + " "
+            save_str += str(float(loc_list[3]) * w) + " "
+            save_str += str(float(loc_list[4]) * h) + " "
+            save_str += str(int(loc_list[0]) + 1) + " "
+
+        write_data(new_label_path, save_str + '\n', 'a+')
+
+
 if __name__ == '__main__':
-    # 从源数据中拷贝出来
-    data_pre_process('../../Data/yolo/yolo_data/car_detect_train/', 'car_detect_train_label.txt',
-                     '../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', "0")
-    data_pre_process('../../Data/yolo/yolo_data/car_detect_test/', 'car_detect_test_label.txt',
-                     '../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', "0")
-    # 在源数据中处理
-    data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_train/', 'car_loc_label.txt', "1")
-    data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_test/', 'car_loc_label.txt', "1")
+    # # 从Faceboxes数据中拷贝出来
+    # data_pre_process('../../Data/yolo/yolo_data/car_detect_train/', 'car_detect_train_label.txt',
+    #                  '../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', "0")
+    # data_pre_process('../../Data/yolo/yolo_data/car_detect_test/', 'car_detect_test_label.txt',
+    #                  '../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', "0")
+    # # 在源数据中处理
+    # data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_train/', 'car_loc_label.txt', "1")
+    # data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_test/', 'car_loc_label.txt', "1")
+
+    # yolo数据转成Faceboxes数据
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'faceboxes_label.txt')
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'faceboxes_label.txt')
