@@ -46,7 +46,7 @@ def parse_argvs():
     # parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="checkpoint_dir")
     parser.add_argument("--use_cuda", type=bool, default=True, help="whether to use cuda if available")
     parser.add_argument("--re_train", type=bool, default=False, help="re_train")
-    parser.add_argument("--best_loss", type=float, default=1000.0, help="best_loss")
+    parser.add_argument("--best_loss", type=float, default=10.0, help="best_loss")
     parser.add_argument("--detail_log", type=bool, default=False, help="detail_log")
 
     opt = parser.parse_args()
