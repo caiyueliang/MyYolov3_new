@@ -138,6 +138,9 @@ class YOLOLayer(nn.Module):
         self.ce_loss = nn.CrossEntropyLoss()                        # Class loss        交叉熵
 
     def forward(self, x, targets=None):
+        # targets: size (50, 5);每一行表示一个标签（最多50个），分别表示：类别，x轴中心点，y轴中心点，w，h
+        # print(targets, targets)
+
         nA = self.num_anchors           # 锚框个数：3
         nB = x.size(0)                  # batch size大小：16
         nG = x.size(2)                  # 矩阵大小：13
@@ -153,18 +156,18 @@ class YOLOLayer(nn.Module):
         LongTensor = torch.cuda.LongTensor if x.is_cuda else torch.LongTensor
         ByteTensor = torch.cuda.ByteTensor if x.is_cuda else torch.ByteTensor
 
-        # 输入x形状如(16, 21, 13, 13)
-        # 重新变换成矩阵维度为(nB, nA, self.bbox_attrs, nG, nG)，如(16, 3, 7, 13, 13)
-        # 再调整成(nB, nA, nG, nG, self.bbox_attrs)，如(16, 3, 13, 13, 7)
+        # 输入x形状如(-1, 21, 13, 13)
+        # 重新变换成矩阵维度为(nB, nA, self.bbox_attrs, nG, nG)，如(-1, 3, 7, 13, 13)
+        # 再调整成(nB, nA, nG, nG, self.bbox_attrs)，如(-1, 3, 13, 13, 7)
         prediction = x.view(nB, nA, self.bbox_attrs, nG, nG).permute(0, 1, 3, 4, 2).contiguous()
 
         # Get outputs
-        x = torch.sigmoid(prediction[..., 0])           # Center x
-        y = torch.sigmoid(prediction[..., 1])           # Center y
-        w = prediction[..., 2]                          # Width
-        h = prediction[..., 3]                          # Height
-        pred_conf = torch.sigmoid(prediction[..., 4])   # Conf
-        pred_cls = torch.sigmoid(prediction[..., 5:])   # Cls pred.
+        x = torch.sigmoid(prediction[..., 0])           # Center x      x轴中心点
+        y = torch.sigmoid(prediction[..., 1])           # Center y      y轴中心点
+        w = prediction[..., 2]                          # Width         w
+        h = prediction[..., 3]                          # Height        h
+        pred_conf = torch.sigmoid(prediction[..., 4])   # Conf          置信度
+        pred_cls = torch.sigmoid(prediction[..., 5:])   # Cls pred.     类别预测
 
         # Calculate offsets for each grid
         grid_x = torch.arange(nG).repeat(nG, 1).view([1, 1, nG, nG]).type(FloatTensor)

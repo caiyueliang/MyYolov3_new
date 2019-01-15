@@ -147,6 +147,7 @@ class ListDataset(Dataset):
         # print(input_img)
         # print(filled_labels)
 
+        # filled_labels size (50, 5);每一行表示一个标签（最多50个），分别表示：类别，x轴中心点，y轴中心点，w，h
         return img_path, input_img, filled_labels
 
     def __len__(self):
