@@ -1,3 +1,4 @@
+# encoding:utf-8
 import glob
 import random
 import os
@@ -15,7 +16,7 @@ import matplotlib.patches as patches
 from skimage.transform import resize
 
 import sys
-
+import cv2
 
 class ImageFolder(Dataset):
     def __init__(self, folder_path, img_size=416):
@@ -86,8 +87,11 @@ class ListDataset(Dataset):
         # Add padding
         input_img = np.pad(img, pad, 'constant', constant_values=128) / 255.
         padded_h, padded_w, _ = input_img.shape
+        # show_img = input_img.copy()
+
         # Resize and normalize
         input_img = resize(input_img, (self.img_shape, self.img_shape, 3), mode='reflect')
+
         # Channels-first
         input_img = np.transpose(input_img, (2, 0, 1))
         # As pytorch tensor
@@ -102,6 +106,7 @@ class ListDataset(Dataset):
         labels = None
         if os.path.exists(label_path):
             labels = np.loadtxt(label_path).reshape(-1, 5)
+            # print('labels', labels)
             # Extract coordinates for unpadded + unscaled image
             x1 = w * (labels[:, 1] - labels[:, 3]/2)
             y1 = h * (labels[:, 2] - labels[:, 4]/2)
@@ -112,11 +117,27 @@ class ListDataset(Dataset):
             y1 += pad[0][0]
             x2 += pad[1][0]
             y2 += pad[0][0]
+            # print(x1)
+            # print(y1)
+            # print(x2)
+            # print(y2)
             # Calculate ratios from coordinates
-            labels[:, 1] = ((x1 + x2) / 2) / padded_w
-            labels[:, 2] = ((y1 + y2) / 2) / padded_h
-            labels[:, 3] *= w / padded_w
-            labels[:, 4] *= h / padded_h
+            # print('padded_h, padded_w, _', padded_h, padded_w, _)
+
+            labels[:, 1] = float((x1 + x2) / 2) / float(padded_w)               # x轴中心点
+            labels[:, 2] = float((y1 + y2) / 2) / float(padded_h)               # y轴中心点
+            labels[:, 3] *= float(w) / float(padded_w)                          # w比例
+            labels[:, 4] *= float(h) / float(padded_h)                          # h比例
+            # print('labels', labels)
+
+            # for i, x in enumerate(x1):
+            #     cv2.rectangle(show_img, (int(x), int(y1[i])), (int(x2[i]), int(y2[i])), (0, 255, 0))
+            # for label in labels:
+            #     cv2.rectangle(show_img, (int((label[1] - label[3]/2) * padded_w), int((label[2] - label[4]/2) * padded_h)),
+            #                   (int((label[1] + label[3]/2) * padded_w), int((label[2] + label[4]/2) * padded_h)), (0, 255, 0))
+            # cv2.imshow('image', show_img)
+            # cv2.waitKey(0)
+
         # Fill matrix
         filled_labels = np.zeros((self.max_objects, 5))
         if labels is not None:
@@ -126,6 +147,7 @@ class ListDataset(Dataset):
         # print(img_path)
         # print(input_img)
         # print(filled_labels)
+
         return img_path, input_img, filled_labels
 
     def __len__(self):
