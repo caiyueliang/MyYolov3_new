@@ -124,10 +124,10 @@ class ListDataset(Dataset):
             # Calculate ratios from coordinates
             # print('padded_h, padded_w, _', padded_h, padded_w, _)
 
-            labels[:, 1] = float((x1 + x2) / 2) / float(padded_w)               # x轴中心点
-            labels[:, 2] = float((y1 + y2) / 2) / float(padded_h)               # y轴中心点
-            labels[:, 3] *= float(w) / float(padded_w)                          # w比例
-            labels[:, 4] *= float(h) / float(padded_h)                          # h比例
+            labels[:, 1] = ((x1 + x2) / 2) / float(padded_w)               # x轴中心点
+            labels[:, 2] = ((y1 + y2) / 2) / float(padded_h)               # y轴中心点
+            labels[:, 3] *= float(w) / float(padded_w)                     # w比例
+            labels[:, 4] *= float(h) / float(padded_h)                     # h比例
             # print('labels', labels)
 
             # for i, x in enumerate(x1):
