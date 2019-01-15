@@ -60,7 +60,7 @@ class ListDataset(Dataset):
         print('label_files len: %d' % len(self.label_files))
 
         self.img_shape = img_size
-        self.max_objects = 50
+        self.max_objects = 50                       # 每张图片最多支持多少个标签
 
     def __getitem__(self, index):
 
@@ -123,11 +123,10 @@ class ListDataset(Dataset):
             # print(y2)
             # Calculate ratios from coordinates
             # print('padded_h, padded_w, _', padded_h, padded_w, _)
-
-            labels[:, 1] = ((x1 + x2) / 2) / float(padded_w)               # x轴中心点
-            labels[:, 2] = ((y1 + y2) / 2) / float(padded_h)               # y轴中心点
-            labels[:, 3] *= float(w) / float(padded_w)                     # w比例
-            labels[:, 4] *= float(h) / float(padded_h)                     # h比例
+            labels[:, 1] = ((x1 + x2) / 2) / float(padded_w)                # 第1列表示：x轴中心点（比例） # 第0列表示：类别
+            labels[:, 2] = ((y1 + y2) / 2) / float(padded_h)                # 第2列表示：y轴中心点（比例）
+            labels[:, 3] *= float(w) / float(padded_w)                      # 第3列表示：w（比例）
+            labels[:, 4] *= float(h) / float(padded_h)                      # 第4列表示：h（比例）
             # print('labels', labels)
 
             # for i, x in enumerate(x1):
