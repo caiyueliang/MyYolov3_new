@@ -139,7 +139,7 @@ class YOLOLayer(nn.Module):
 
     def forward(self, x, targets=None):
         # targets: size (50, 5);每一行表示一个标签（最多50个），分别表示：类别，x轴中心点，y轴中心点，w，h
-        # print(targets, targets)
+        # print('targets', targets)
 
         nA = self.num_anchors           # 锚框个数：3
         nB = x.size(0)                  # batch size大小：16
@@ -162,26 +162,30 @@ class YOLOLayer(nn.Module):
         prediction = x.view(nB, nA, self.bbox_attrs, nG, nG).permute(0, 1, 3, 4, 2).contiguous()
 
         # Get outputs
-        x = torch.sigmoid(prediction[..., 0])           # Center x      x轴中心点
-        y = torch.sigmoid(prediction[..., 1])           # Center y      y轴中心点
-        w = prediction[..., 2]                          # Width         w
-        h = prediction[..., 3]                          # Height        h
-        pred_conf = torch.sigmoid(prediction[..., 4])   # Conf          置信度
-        pred_cls = torch.sigmoid(prediction[..., 5:])   # Cls pred.     类别预测
+        x = torch.sigmoid(prediction[..., 0])           # Center x      size: (-1, 3, 13, 13)       x轴中心点
+        y = torch.sigmoid(prediction[..., 1])           # Center y      size: (-1, 3, 13, 13)       y轴中心点
+        w = prediction[..., 2]                          # Width         size: (-1, 3, 13, 13)       w
+        h = prediction[..., 3]                          # Height        size: (-1, 3, 13, 13)       h
+        pred_conf = torch.sigmoid(prediction[..., 4])   # Conf          size: (-1, 3, 13, 13)       置信度
+        pred_cls = torch.sigmoid(prediction[..., 5:])   # Cls pred.     size: (-1, 3, 13, 13, 2)    类别预测
 
         # Calculate offsets for each grid
         grid_x = torch.arange(nG).repeat(nG, 1).view([1, 1, nG, nG]).type(FloatTensor)
         grid_y = torch.arange(nG).repeat(nG, 1).t().view([1, 1, nG, nG]).type(FloatTensor)
-        scaled_anchors = FloatTensor([(a_w / stride, a_h / stride) for a_w, a_h in self.anchors])
-        anchor_w = scaled_anchors[:, 0:1].view((1, nA, 1, 1))
-        anchor_h = scaled_anchors[:, 1:2].view((1, nA, 1, 1))
+        scaled_anchors = FloatTensor([(a_w / stride, a_h / stride) for a_w, a_h in self.anchors])   # 锚框，每层3个
+        anchor_w = scaled_anchors[:, 0:1].view((1, nA, 1, 1))               # (1, 3, 1, 1): [[[[2.5312]],[[4.2188]],[10.7500]]]]
+        anchor_h = scaled_anchors[:, 1:2].view((1, nA, 1, 1))               # (1, 3, 1, 1): [[[[2.5625]],[[5.2812]],[9.9688]]]]
+        # print('grid_x', grid_x.size(), grid_x)                            # (1, 1, 13, 13) 值为：[[[0到12], [0到12]]]
+        # print('scaled_anchors', scaled_anchors.size(), scaled_anchors)    # (3, 2) 值：[[2.5312, 2.5625],[4.2188, 5.2812],[10.7500, 9.9688]]
+        # print('anchor_w', anchor_w.size(), anchor_w)
+        # print('anchor_h', anchor_h.size(), anchor_h)
 
         # Add offset and scale with anchors
-        pred_boxes = FloatTensor(prediction[..., :4].shape)
-        pred_boxes[..., 0] = x.data + grid_x
-        pred_boxes[..., 1] = y.data + grid_y
-        pred_boxes[..., 2] = torch.exp(w.data) * anchor_w
-        pred_boxes[..., 3] = torch.exp(h.data) * anchor_h
+        pred_boxes = FloatTensor(prediction[..., :4].shape)                 # (-1, 3, 13, 13, 4)
+        pred_boxes[..., 0] = x.data + grid_x                                # x轴中心点:关于grid_x（锚框中心点）的偏移，偏移值x.data
+        pred_boxes[..., 1] = y.data + grid_y                                # y轴中心点:关于grid_y（锚框中心点）的偏移，偏移值y.data
+        pred_boxes[..., 2] = torch.exp(w.data) * anchor_w                   # e的w次幂乘以基础锚框的宽
+        pred_boxes[..., 3] = torch.exp(h.data) * anchor_h                   # e的h次幂乘以基础锚框的高
 
         # Training
         if targets is not None:
