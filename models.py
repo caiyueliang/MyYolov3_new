@@ -130,7 +130,8 @@ class YOLOLayer(nn.Module):
         self.num_classes = num_classes                              # 类别个数
         self.bbox_attrs = 5 + num_classes                           # bbox的属性： 中心坐标，尺寸，目标分数（5个）和C个类
         self.image_dim = img_dim                                    # 输入图片的高度
-        self.ignore_thres = 0.8                                     # 忽略的阈值 TODO iou相关
+        self.ignore_thres = 0.2                                     # iou的忽略阈值 0.5 TODO iou相关
+        self.iou_match_thres = 0.8                                  # 真实框和预测框匹配上的阈值
         self.conf_thres = 0.9                                       # 置信度阈值
         self.lambda_coord = 1
 
@@ -206,7 +207,8 @@ class YOLOLayer(nn.Module):
                 num_anchors=nA,                         # 3
                 num_classes=self.num_classes,           # 2
                 grid_size=nG,                           # 13
-                ignore_thres=self.ignore_thres,         # iou的阈值              0.5，0.8
+                ignore_thres=self.ignore_thres,         # iou的忽略阈值
+                iou_match_thres=self.iou_match_thres,   # 真实框和预测框匹配上的阈值 0.8
                 conf_thres=self.conf_thres,             # 置信度阈值              0.9
                 img_dim=self.image_dim,                 # 416
             )

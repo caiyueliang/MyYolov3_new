@@ -185,9 +185,8 @@ def non_max_suppression(prediction, num_classes, conf_thres=0.5, nms_thres=0.4):
     return output
 
 
-def build_targets(
-    pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors, num_classes, grid_size, ignore_thres, conf_thres, img_dim
-):
+def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors, num_classes, grid_size, ignore_thres,
+                  conf_thres, iou_match_thres, img_dim):
     # print('pred_boxes', pred_boxes.size())        # (-1, 3, 13, 13, 4)
     # print('pred_conf', pred_conf.size())          # (-1, 3, 13, 13)
     # print('pred_cls', pred_cls.size())            # (-1, 3, 13, 13, 2)
@@ -238,9 +237,9 @@ def build_targets(
             # Find the best matching anchor box
             best_n = np.argmax(anch_ious)
             # Get ground truth box
-            gt_box = torch.FloatTensor(np.array([gx, gy, gw, gh])).unsqueeze(0)
+            gt_box = torch.FloatTensor(np.array([gx, gy, gw, gh])).unsqueeze(0)     # 真实标签框
             # Get the best prediction
-            pred_box = pred_boxes[b, best_n, gj, gi].unsqueeze(0)
+            pred_box = pred_boxes[b, best_n, gj, gi].unsqueeze(0)                   # 最好的预测框
             # Masks
             mask[b, best_n, gj, gi] = 1
             conf_mask[b, best_n, gj, gi] = 1
@@ -256,11 +255,11 @@ def build_targets(
             tconf[b, best_n, gj, gi] = 1
 
             # Calculate iou between ground truth and best matching prediction
-            iou = bbox_iou(gt_box, pred_box, x1y1x2y2=False)
+            iou = bbox_iou(gt_box, pred_box, x1y1x2y2=False)                        # 真实标签框gt_box和最好的预测框pred_box计算iou
             pred_label = torch.argmax(pred_cls[b, best_n, gj, gi])
             score = pred_conf[b, best_n, gj, gi]
-            if iou > 0.5 and pred_label == target_label and score > conf_thres:
-                nCorrect += 1                                                           # 对的个数
+            if iou > iou_match_thres and pred_label == target_label and score > conf_thres:
+                nCorrect += 1                                                       # 对的个数
 
     return nGT, nCorrect, mask, conf_mask, tx, ty, tw, th, tconf, tcls
 
