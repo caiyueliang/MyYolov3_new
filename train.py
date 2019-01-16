@@ -94,8 +94,9 @@ class ModuleTrain:
             print('[load model] %s ...' % self.opt.checkpoint_name)
             # self.model.load_weights(self.opt.checkpoint_name)
             self.load(self.opt.checkpoint_name)
-
-        self.model.apply(weights_init_normal)
+        else:
+            # 模型初始化化
+            self.model.apply(weights_init_normal)
 
         if self.cuda:
             self.model = self.model.cuda()
@@ -112,15 +113,15 @@ class ModuleTrain:
 
     def load(self, name):
         print('[Load model] %s ...' % name)
-        # self.model.load_state_dict(torch.load(name))
-        self.model = torch.load(name)
-        self.print_net()
+        self.model.load_state_dict(torch.load(name))
+        # self.model = torch.load(name)
+        # self.print_net()
 
     def save(self, name):
         print('[Save model] %s ...' % name)
-        # torch.save(self.model.state_dict(), name)
-        torch.save(self.model, name)
-        self.print_net()
+        torch.save(self.model.state_dict(), name)
+        # torch.save(self.model, name)
+        # self.print_net()
 
     def print_net(self):
         print('[print_net] ...')

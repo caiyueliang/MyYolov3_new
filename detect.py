@@ -64,12 +64,12 @@ dataloader = DataLoader(ImageFolder(opt.image_folder, img_size=opt.img_size),
                         batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu)
 
 classes = load_classes(opt.class_path)                        # Extracts class labels from file
-# torch.save(model.state_dict(), opt.weights_path)
-model = torch.load(opt.weights_path)
+torch.save(model.state_dict(), opt.weights_path)
+# model = torch.load(opt.weights_path)
 
-print('[print_net] ...')
-params = model.state_dict()
-print(params['module_list.0.conv_0.weight'])
+# print('[print_net] ...')
+# params = model.state_dict()
+# print(params['module_list.0.conv_0.weight'])
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
