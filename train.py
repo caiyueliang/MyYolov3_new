@@ -122,6 +122,9 @@ class ModuleTrain:
 
     def train(self):
         for epoch in range(self.opt.epochs):
+            if epoch % 1 == 0:
+                self.show_image()
+
             print("\n=========================================================")
             self.model.train()
 
@@ -298,6 +301,56 @@ class ModuleTrain:
                 avg_precision)
               )
         return avg_loss
+
+    def show_image(self):
+        self.model.eval()
+
+        image_loader = torch.utils.data.DataLoader(ImageFolder('../Data/yolo/yolo_data_new/detect_test'), shuffle=False,
+                                                   batch_size=1, num_workers=self.opt.n_cpu)
+
+        for batch_i, (_, imgs) in enumerate(image_loader):
+            imgs = Variable(imgs.type(self.tensor))
+
+            # Get detections
+            with torch.no_grad():
+                detections = self.model(imgs)
+                print('detections size', detections.size(), detections)
+                detections = non_max_suppression(detections, 2, 0.8, 0.4)
+                if detections[0] is not None:
+                    print('detections', detections[0].size(), detections)
+                else:
+                    print('detections', detections)
+
+            # if detections is not None:
+            #     unique_labels = detections[:, -1].cpu().unique()
+            #     n_cls_preds = len(unique_labels)
+            #     bbox_colors = random.sample(colors, n_cls_preds)
+            #     for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
+            #         print ('\t+ Label: %s, Conf: %.5f' % (classes[int(cls_pred)], cls_conf.item()))
+            #
+            #         # Rescale coordinates to original dimensions
+            #         box_h = ((y2 - y1) / unpad_h) * img.shape[0]
+            #         box_w = ((x2 - x1) / unpad_w) * img.shape[1]
+            #         y1 = ((y1 - pad_y // 2) / unpad_h) * img.shape[0]
+            #         x1 = ((x1 - pad_x // 2) / unpad_w) * img.shape[1]
+            #
+            #         color = bbox_colors[int(np.where(unique_labels == int(cls_pred))[0])]
+            #         # Create a Rectangle patch
+            #         bbox = patches.Rectangle((x1, y1), box_w, box_h, linewidth=2,
+            #                                  edgecolor=color,
+            #                                  facecolor='none')
+            #         # Add the bbox to the plot
+            #         ax.add_patch(bbox)
+            #         # Add label
+            #         plt.text(x1, y1, s=classes[int(cls_pred)], color='white', verticalalignment='top',
+            #                  bbox={'color': color, 'pad': 0})
+
+            # # Save generated image with detections
+            # plt.axis('off')
+            # plt.gca().xaxis.set_major_locator(NullLocator())
+            # plt.gca().yaxis.set_major_locator(NullLocator())
+            # plt.savefig('output/%d.png' % (img_i), bbox_inches='tight', pad_inches=0.0)
+            # plt.close()
 
 
 if __name__ == '__main__':
