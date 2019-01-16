@@ -25,25 +25,25 @@ def parse_argvs():
     parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
     parser.add_argument("--decay_epoch", type=int, default=60, help="decay_epoch")
     parser.add_argument("--lr", type=float, default=0.001, help="lr")
-    # parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
-    parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
-    # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
-    parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3-tiny.cfg", help="model_config_path")
 
-    parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo_tiny.weights", help="")
-    # parser.add_argument("--data_config_path", type=str, default="config/coco.data", help="path to data config file")
+    parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
+
+    parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
+    parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo.weights", help="")
+
+    # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3-tiny.cfg", help="model_config_path")
+    # parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo_tiny.weights", help="")
     parser.add_argument("--train_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_train", help="")
     parser.add_argument("--test_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_test", help="")
     parser.add_argument("--image_file", type=str, default="image_path.txt", help="image_file")
 
-    # parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")
+    parser.add_argument('--class_num', type=int, default=2, help='class_num')
     parser.add_argument("--class_path", type=str, default="../Data/yolo/yolo_data_new/lpr.names", help="")
     parser.add_argument("--conf_thres", type=float, default=0.8, help="object confidence threshold")
     parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold for non-maximum suppression")
     parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
     parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")
 
-    # parser.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="checkpoint_dir")
     parser.add_argument("--use_cuda", type=bool, default=True, help="whether to use cuda if available")
     parser.add_argument("--re_train", type=bool, default=False, help="re_train")
     parser.add_argument("--best_loss", type=float, default=10.0, help="best_loss")
@@ -314,10 +314,10 @@ class ModuleTrain:
             # Get detections
             with torch.no_grad():
                 detections = self.model(imgs)
-                print('detections size', detections.size(), detections)
-                detections = non_max_suppression(detections, 2, 0.8, 0.4)
+                print('detections size', detections.size())
+                detections = non_max_suppression(detections, self.opt.class_num, self.opt.conf_thres, self.opt.nms_thres)
                 if detections[0] is not None:
-                    print('detections', detections[0].size(), detections)
+                    print('detections', detections[0].size())
                 else:
                     print('detections', detections)
 
