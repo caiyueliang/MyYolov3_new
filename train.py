@@ -39,7 +39,7 @@ def parse_argvs():
 
     parser.add_argument('--class_num', type=int, default=2, help='class_num')
     parser.add_argument("--class_path", type=str, default="../Data/yolo/yolo_data_new/lpr.names", help="")
-    parser.add_argument("--conf_thres", type=float, default=0.8, help="object confidence threshold")
+    parser.add_argument("--conf_thres", type=float, default=0.9, help="object confidence threshold")
     parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold for non-maximum suppression")
     parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
     parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")
