@@ -20,17 +20,21 @@ import matplotlib.patches as patches
 from matplotlib.ticker import NullLocator
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--image_folder', type=str, default='../Data/yolo/yolo_data_new/detect_test', help='path to dataset')
-parser.add_argument('--config_path', type=str, default='config/yolov3.cfg', help='path to model config file')
-parser.add_argument('--weights_path', type=str, default='weights/yolov3.weights', help='path to weights file')
-parser.add_argument('--class_num', type=int, default=2, help='class_num')
-
+# =============================================================================================================================
 # parser.add_argument('--image_folder', type=str, default='data/samples', help='path to dataset')
-# parser.add_argument('--config_path', type=str, default='config/lpr_yolov3-tiny.cfg', help='model config file')
-# parser.add_argument('--weights_path', type=str, default='checkpoints/lpr_yolo_tiny_best.weights', help='weights file')
+# parser.add_argument('--image_folder', type=str, default='../Data/yolo/yolo_data_new/detect_test', help='path to dataset')
+# parser.add_argument('--config_path', type=str, default='config/yolov3-tiny.cfg', help='path to model config file')
+# parser.add_argument('--weights_path', type=str, default='weights/yolov3-tiny.weights', help='path to weights file')
 # parser.add_argument('--class_num', type=int, default=80, help='class_num')
+# parser.add_argument('--class_path', type=str, default='data/coco.names', help='path to class label file')
 
+# =============================================================================================================================
+parser.add_argument('--image_folder', type=str, default='../Data/yolo/yolo_data_new/detect_test', help='path to dataset')
+parser.add_argument('--config_path', type=str, default='config/lpr_yolov3-tiny.cfg', help='model config file')
+parser.add_argument('--weights_path', type=str, default='checkpoints/lpr_yolo_tiny_best.weights', help='weights file')
+parser.add_argument('--class_num', type=int, default=2, help='class_num')
 parser.add_argument('--class_path', type=str, default='../Data/yolo/yolo_data_new/lpr.names', help='path to class label file')
+
 parser.add_argument('--conf_thres', type=float, default=0.1, help='object confidence threshold')
 parser.add_argument('--nms_thres', type=float, default=0.4, help='iou thresshold for non-maximum suppression')
 parser.add_argument('--batch_size', type=int, default=1, help='size of the batches')
@@ -75,9 +79,9 @@ for batch_i, (img_paths, input_imgs) in enumerate(dataloader):
     # Get detections
     with torch.no_grad():
         detections = model(input_imgs)
-        print detections.size()
+        print ('detections size', detections.size(), detections)
         detections = non_max_suppression(detections, opt.class_num, opt.conf_thres, opt.nms_thres)
-        print detections
+        print ('detections', detections)
 
     # Log progress
     current_time = time.time()
