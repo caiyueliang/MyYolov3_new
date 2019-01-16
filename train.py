@@ -26,7 +26,7 @@ def parse_argvs():
     parser.add_argument("--decay_epoch", type=int, default=60, help="decay_epoch")
     parser.add_argument("--lr", type=float, default=0.001, help="lr")
 
-    parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
+    parser.add_argument("--batch_size", type=int, default=8, help="size of each image batch")
 
     # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
     # parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo.weights", help="")

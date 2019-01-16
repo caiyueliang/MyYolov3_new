@@ -63,7 +63,8 @@ model.eval()                                                    # Set in evaluat
 dataloader = DataLoader(ImageFolder(opt.image_folder, img_size=opt.img_size),
                         batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu)
 
-classes = load_classes(opt.class_path)                          # Extracts class labels from file
+# classes = load_classes(opt.class_path)                        # Extracts class labels from file
+torch.save(model.state_dict(), opt.weights_path)
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
