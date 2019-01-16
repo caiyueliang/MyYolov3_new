@@ -49,7 +49,7 @@ class ImageFolder(Dataset):
 
 
 class ListDataset(Dataset):
-    def __init__(self, root_path, image_file, img_size=416):
+    def __init__(self, root_path, image_file, train=False, img_size=416):
         self.root_path = root_path
         self.image_file = image_file
         with open(os.path.join(self.root_path, self.image_file), 'r') as file:
@@ -60,6 +60,7 @@ class ListDataset(Dataset):
         print('label_files len: %d' % len(self.label_files))
 
         self.img_shape = img_size
+        self.train = train
         self.max_objects = 50                       # 每张图片最多支持多少个标签
 
     # def __getitem__(self, index):
@@ -188,6 +189,11 @@ class ListDataset(Dataset):
             cv2.imshow('image', show_img)
             cv2.waitKey(0)
 
+        # # 图片增广
+        # if self.train:
+        #     img, boxes, labels = self.random_crop(img, boxes, labels)  # 随机裁剪
+        #     img = self.random_bright(img)  # 随机调亮
+
         # Fill matrix
         filled_labels = np.zeros((self.max_objects, 5))
         if labels is not None:
@@ -203,3 +209,70 @@ class ListDataset(Dataset):
 
     def __len__(self):
         return len(self.img_files)
+
+    # 随机裁剪
+    def random_crop(self, im, boxes, labels):
+        # print('random_crop', boxes, labels)
+
+        imh, imw, _ = im.shape
+        short_size = min(imw, imh)
+        # print(imh, imw, short_size)
+        while True:
+            mode = random.choice([None, 0.3, 0.5, 0.7, 0.9])
+            if mode is None:
+                boxes_uniform = boxes / torch.Tensor([imw, imh, imw, imh]).expand_as(boxes)
+                boxwh = boxes_uniform[:, 2:] - boxes_uniform[:, :2]
+                mask = (boxwh[:, 0] > self.small_threshold) & (boxwh[:, 1] > self.small_threshold)
+                if not mask.any():
+                    print('default image have none box bigger than small_threshold')
+                    im, boxes, labels = self.random_getim()
+                    imh, imw, _ = im.shape
+                    short_size = min(imw, imh)
+                    continue
+                selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
+                selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
+                return im, selected_boxes, selected_labels
+
+            for _ in range(10):
+                w = random.randrange(int(0.3 * short_size), short_size)
+                h = w
+
+                x = random.randrange(imw - w)
+                y = random.randrange(imh - h)
+                roi = torch.Tensor([[x, y, x + w, y + h]])
+
+                center = (boxes[:, :2] + boxes[:, 2:]) / 2
+                roi2 = roi.expand(len(center), 4)
+                mask = (center > roi2[:, :2]) & (center < roi2[:, 2:])
+                mask = mask[:, 0] & mask[:, 1]
+                if not mask.any():
+                    continue
+
+                selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
+                img = im[y:y + h, x:x + w, :]
+                selected_boxes[:, 0].add_(-x).clamp_(min=0, max=w)
+                selected_boxes[:, 1].add_(-y).clamp_(min=0, max=h)
+                selected_boxes[:, 2].add_(-x).clamp_(min=0, max=w)
+                selected_boxes[:, 3].add_(-y).clamp_(min=0, max=h)
+                # print('croped')
+
+                boxes_uniform = selected_boxes / torch.Tensor([w, h, w, h]).expand_as(selected_boxes)
+                boxwh = boxes_uniform[:, 2:] - boxes_uniform[:, :2]
+                mask = (boxwh[:, 0] > self.small_threshold) & (boxwh[:, 1] > self.small_threshold)
+                if not mask.any():
+                    print('crop image have none box bigger than small_threshold')
+                    im, boxes, labels = self.random_getim()
+                    imh, imw, _ = im.shape
+                    short_size = min(imw, imh)
+                    continue
+                selected_boxes_selected = selected_boxes.index_select(0, mask.nonzero().squeeze(1))
+                selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
+                return img, selected_boxes_selected, selected_labels
+
+    # 随机调亮
+    def random_bright(self, im, delta=16):
+        alpha = random.random()
+        if alpha > 0.3:
+            im = im * alpha + random.randrange(-delta, delta)
+            im = im.clip(min=0, max=255).astype(np.uint8)
+        return im
