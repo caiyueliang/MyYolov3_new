@@ -28,11 +28,11 @@ def parse_argvs():
 
     parser.add_argument("--batch_size", type=int, default=4, help="size of each image batch")
 
-    parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
-    parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo.weights", help="")
+    # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3.cfg", help="model_config_path")
+    # parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo.weights", help="")
+    parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3-tiny.cfg", help="model_config_path")
+    parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo_tiny.weights", help="")
 
-    # parser.add_argument("--model_config_path", type=str, default="config/lpr_yolov3-tiny.cfg", help="model_config_path")
-    # parser.add_argument("--checkpoint_name", type=str, default="checkpoints/lpr_yolo_tiny.weights", help="")
     parser.add_argument("--train_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_train", help="")
     parser.add_argument("--test_path", type=str, default="../Data/yolo/yolo_data_new/car_detect_test", help="")
     parser.add_argument("--image_file", type=str, default="image_path.txt", help="image_file")
@@ -88,12 +88,12 @@ class ModuleTrain:
 
         # Initiate model
         self.model = Darknet(opt.model_config_path)
-        # model.load_weights(opt.weights_path)
+
         # 加载模型
         if os.path.exists(self.opt.checkpoint_name) and not self.re_train:
             print('[load model] %s ...' % self.opt.checkpoint_name)
-            self.model.load_weights(self.opt.checkpoint_name)
-            # self.load(self.opt.checkpoint_name)
+            # self.model.load_weights(self.opt.checkpoint_name)
+            self.load(self.opt.checkpoint_name)
 
         self.model.apply(weights_init_normal)
 
@@ -113,12 +113,12 @@ class ModuleTrain:
     def load(self, name):
         print('[Load model] %s ...' % name)
         self.model.load_state_dict(torch.load(name))
-        # self.model.load(name)
+        # self.model = torch.load(name)
 
     def save(self, name):
         print('[Save model] %s ...' % name)
         torch.save(self.model.state_dict(), name)
-        # self.model.save(name)
+        # torch.save(self.model, name)
 
     def train(self):
         for epoch in range(self.opt.epochs):
@@ -220,11 +220,11 @@ class ModuleTrain:
                         best_model_file += '_best'
                     if str_index != (len(str_list) - 1):
                         best_model_file += '.'
-                self.model.save_weights(best_model_file)      # 保存最好的模型
-                # self.save(best_model_file)                      # 保存最好的模型
+                # self.model.save_weights(best_model_file)      # 保存最好的模型
+                self.save(best_model_file)                      # 保存最好的模型
 
-        self.model.save_weights(self.opt.checkpoint_name)     # 保存模型
-        # self.save(self.opt.checkpoint_name)                     # 保存模型
+        # self.model.save_weights(self.opt.checkpoint_name)     # 保存模型
+        self.save(self.opt.checkpoint_name)                     # 保存模型
 
     def test(self):
         self.model.eval()
