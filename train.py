@@ -91,9 +91,9 @@ class ModuleTrain:
         # model.load_weights(opt.weights_path)
         # 加载模型
         if os.path.exists(self.opt.checkpoint_name) and not self.re_train:
-            print('[load model] ... %s' % self.opt.checkpoint_name)
-            # self.model.load_weights(self.opt.checkpoint_name)
-            self.load(self.opt.checkpoint_name)
+            print('[load model] %s ...' % self.opt.checkpoint_name)
+            self.model.load_weights(self.opt.checkpoint_name)
+            # self.load(self.opt.checkpoint_name)
 
         self.model.apply(weights_init_normal)
 
@@ -217,11 +217,11 @@ class ModuleTrain:
                         best_model_file += '_best'
                     if str_index != (len(str_list) - 1):
                         best_model_file += '.'
-                # self.model.save_weights(best_model_file)      # 保存最好的模型
-                self.save(best_model_file)                      # 保存最好的模型
+                self.model.save_weights(best_model_file)      # 保存最好的模型
+                # self.save(best_model_file)                      # 保存最好的模型
 
-        # self.model.save_weights(self.opt.checkpoint_name)     # 保存模型
-        self.save(self.opt.checkpoint_name)                     # 保存模型
+        self.model.save_weights(self.opt.checkpoint_name)     # 保存模型
+        # self.save(self.opt.checkpoint_name)                     # 保存模型
 
     def test(self):
         self.model.eval()
