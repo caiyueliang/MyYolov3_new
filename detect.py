@@ -64,7 +64,12 @@ dataloader = DataLoader(ImageFolder(opt.image_folder, img_size=opt.img_size),
                         batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu)
 
 # classes = load_classes(opt.class_path)                        # Extracts class labels from file
-torch.save(model.state_dict(), opt.weights_path)
+# torch.save(model.state_dict(), opt.weights_path)
+model = torch.load(opt.weights_path)
+
+print('[print_net] ...')
+params = model.state_dict()
+print(params['module_list.0.conv_0.weight'])
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
@@ -80,9 +85,12 @@ for batch_i, (img_paths, input_imgs) in enumerate(dataloader):
     # Get detections
     with torch.no_grad():
         detections = model(input_imgs)
-        print ('detections size', detections.size(), detections)
+        print ('detections size', detections.size())
         detections = non_max_suppression(detections, opt.class_num, opt.conf_thres, opt.nms_thres)
-        print ('detections', detections)
+        if detections[0] is not None:
+            print('detections', detections[0].size())
+        else:
+            print('detections', detections)
 
     # Log progress
     current_time = time.time()

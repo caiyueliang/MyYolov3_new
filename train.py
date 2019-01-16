@@ -112,13 +112,23 @@ class ModuleTrain:
 
     def load(self, name):
         print('[Load model] %s ...' % name)
-        self.model.load_state_dict(torch.load(name))
-        # self.model = torch.load(name)
+        # self.model.load_state_dict(torch.load(name))
+        self.model = torch.load(name)
+        self.print_net()
 
     def save(self, name):
         print('[Save model] %s ...' % name)
-        torch.save(self.model.state_dict(), name)
-        # torch.save(self.model, name)
+        # torch.save(self.model.state_dict(), name)
+        torch.save(self.model, name)
+        self.print_net()
+
+    def print_net(self):
+        print('[print_net] ...')
+        params = self.model.state_dict()
+        # for k, v in params.items():
+        #     print(k)  # 打印网络中的变量名
+        #     print(v)
+        print(params['module_list.0.conv_0.weight'])
 
     def train(self):
         for epoch in range(self.opt.epochs):
