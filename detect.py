@@ -35,7 +35,7 @@ parser.add_argument('--weights_path', type=str, default='checkpoints/lpr_yolo_ti
 parser.add_argument('--class_num', type=int, default=2, help='class_num')
 parser.add_argument('--class_path', type=str, default='../Data/yolo/yolo_data_new/lpr.names', help='path to class label file')
 
-parser.add_argument('--conf_thres', type=float, default=0.1, help='object confidence threshold')
+parser.add_argument('--conf_thres', type=float, default=0.8, help='object confidence threshold')
 parser.add_argument('--nms_thres', type=float, default=0.4, help='iou thresshold for non-maximum suppression')
 parser.add_argument('--batch_size', type=int, default=1, help='size of the batches')
 parser.add_argument('--n_cpu', type=int, default=0, help='number of cpu threads to use during batch generation')
@@ -63,7 +63,7 @@ model.eval()                                                    # Set in evaluat
 dataloader = DataLoader(ImageFolder(opt.image_folder, img_size=opt.img_size),
                         batch_size=opt.batch_size, shuffle=False, num_workers=opt.n_cpu)
 
-# classes = load_classes(opt.class_path)                        # Extracts class labels from file
+classes = load_classes(opt.class_path)                        # Extracts class labels from file
 # torch.save(model.state_dict(), opt.weights_path)
 model = torch.load(opt.weights_path)
 
