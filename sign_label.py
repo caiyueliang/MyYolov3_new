@@ -283,8 +283,11 @@ class SignLabel:
         h, w, c = image.shape
         print('(h, w, c): (%d, %d, %d)' % (h, w, c))
 
-        with open(label_file, 'r') as file:
-            label_list_str = file.readlines()
+        if os.path.exists(label_file):
+            with open(label_file, 'r') as file:
+                label_list_str = file.readlines()
+        else:
+            label_list_str = list()
 
         print(label_list_str)
         label_list = list()
@@ -412,7 +415,8 @@ if __name__ == '__main__':
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/daozha_3/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_1/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_2/", process_all=True)
-    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_3/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_3/", process_all=True)
+    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_4/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/ketuo_1/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/other_1/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/szlg_1/", process_all=True)
