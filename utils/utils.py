@@ -1,3 +1,4 @@
+# encoding: utf-8
 from __future__ import division
 import math
 import time
@@ -185,28 +186,39 @@ def non_max_suppression(prediction, num_classes, conf_thres=0.5, nms_thres=0.4):
 
 
 def build_targets(
-    pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors, num_classes, grid_size, ignore_thres, img_dim
+    pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors, num_classes, grid_size, ignore_thres, conf_thres, img_dim
 ):
-    nB = target.size(0)
-    nA = num_anchors
-    nC = num_classes
-    nG = grid_size
-    mask = torch.zeros(nB, nA, nG, nG)
-    conf_mask = torch.ones(nB, nA, nG, nG)
-    tx = torch.zeros(nB, nA, nG, nG)
-    ty = torch.zeros(nB, nA, nG, nG)
-    tw = torch.zeros(nB, nA, nG, nG)
-    th = torch.zeros(nB, nA, nG, nG)
-    tconf = torch.ByteTensor(nB, nA, nG, nG).fill_(0)
-    tcls = torch.ByteTensor(nB, nA, nG, nG, nC).fill_(0)
+    # print('pred_boxes', pred_boxes.size())        # (-1, 3, 13, 13, 4)
+    # print('pred_conf', pred_conf.size())          # (-1, 3, 13, 13)
+    # print('pred_cls', pred_cls.size())            # (-1, 3, 13, 13, 2)
+    # print('target', target.size())                # (-1, 50, 5)           最多50个框：类别,x,y,w,h
+    # print('anchors', anchors.size())              # (3, 2)                每层3各锚框：w,h
+    # print('num_anchors', num_anchors)             # 3
+    # print('num_classes', num_classes)             # 2
+    # print('grid_size', grid_size)                 # 13
+    # print('ignore_thres', ignore_thres)           # 忽略的阈值0.5，0.8
+    # print('img_dim', img_dim)                     # 416
+
+    nB = target.size(0)                                     # batch size： -1
+    nA = num_anchors                                        # 3
+    nC = num_classes                                        # 2
+    nG = grid_size                                          # 13
+    mask = torch.zeros(nB, nA, nG, nG)                      # (-1, 3, 13, 13)
+    conf_mask = torch.ones(nB, nA, nG, nG)                  # (-1, 3, 13, 13)
+    tx = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
+    ty = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
+    tw = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
+    th = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
+    tconf = torch.ByteTensor(nB, nA, nG, nG).fill_(0)       # (-1, 3, 13, 13)       填充0
+    tcls = torch.ByteTensor(nB, nA, nG, nG, nC).fill_(0)    # (-1, 3, 13, 13, 2)    填充0
 
     nGT = 0
     nCorrect = 0
     for b in range(nB):
-        for t in range(target.shape[1]):
+        for t in range(target.shape[1]):            # 遍历真实的每个标签（50个？有值的才继续）
             if target[b, t].sum() == 0:
                 continue
-            nGT += 1
+            nGT += 1                                # 实际标签个数
             # Convert to position relative to box
             gx = target[b, t, 1] * nG
             gy = target[b, t, 2] * nG
@@ -247,8 +259,8 @@ def build_targets(
             iou = bbox_iou(gt_box, pred_box, x1y1x2y2=False)
             pred_label = torch.argmax(pred_cls[b, best_n, gj, gi])
             score = pred_conf[b, best_n, gj, gi]
-            if iou > 0.5 and pred_label == target_label and score > 0.5:
-                nCorrect += 1
+            if iou > 0.5 and pred_label == target_label and score > conf_thres:
+                nCorrect += 1                                                           # 对的个数
 
     return nGT, nCorrect, mask, conf_mask, tx, ty, tw, th, tconf, tcls
 

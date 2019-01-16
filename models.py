@@ -130,7 +130,8 @@ class YOLOLayer(nn.Module):
         self.num_classes = num_classes                              # 类别个数
         self.bbox_attrs = 5 + num_classes                           # bbox的属性： 中心坐标，尺寸，目标分数（5个）和C个类
         self.image_dim = img_dim                                    # 输入图片的高度
-        self.ignore_thres = 0.5                                     # 忽略的阈值 TODO
+        self.ignore_thres = 0.8                                     # 忽略的阈值 TODO iou相关
+        self.conf_thres = 0.9                                       # 置信度阈值
         self.lambda_coord = 1
 
         self.mse_loss = nn.MSELoss(size_average=True)               # Coordinate loss   中心坐标损失函数
@@ -195,22 +196,28 @@ class YOLOLayer(nn.Module):
                 self.bce_loss = self.bce_loss.cuda()
                 self.ce_loss = self.ce_loss.cuda()
 
+            # nCorrect:正确的个数
             nGT, nCorrect, mask, conf_mask, tx, ty, tw, th, tconf, tcls = build_targets(
-                pred_boxes=pred_boxes.cpu().data,
-                pred_conf=pred_conf.cpu().data,
-                pred_cls=pred_cls.cpu().data,
-                target=targets.cpu().data,
-                anchors=scaled_anchors.cpu().data,
-                num_anchors=nA,
-                num_classes=self.num_classes,
-                grid_size=nG,
-                ignore_thres=self.ignore_thres,
-                img_dim=self.image_dim,
+                pred_boxes=pred_boxes.cpu().data,       # (-1, 3, 13, 13, 4)
+                pred_conf=pred_conf.cpu().data,         # (-1, 3, 13, 13)
+                pred_cls=pred_cls.cpu().data,           # (-1, 3, 13, 13, 2)
+                target=targets.cpu().data,              # (-1, 50, 5)           最多50个框：类别,x,y,w,h
+                anchors=scaled_anchors.cpu().data,      # (3, 2)                每层3各锚框：w,h
+                num_anchors=nA,                         # 3
+                num_classes=self.num_classes,           # 2
+                grid_size=nG,                           # 13
+                ignore_thres=self.ignore_thres,         # iou的阈值              0.5，0.8
+                conf_thres=self.conf_thres,             # 置信度阈值              0.9
+                img_dim=self.image_dim,                 # 416
             )
 
-            nProposals = int((pred_conf > 0.5).sum().item())
-            recall = float(nCorrect / nGT) if nGT else 1
-            precision = float(nCorrect / nProposals)
+            # print('nGT', nGT)                                               # 一个batch 中，实际标签个数       18
+            # print('nCorrect', nCorrect)                                     # 预测正确的个数                  17
+
+            nProposals = int((pred_conf > self.conf_thres).sum().item())    # 建议区域个数
+            # print('nProposals', nProposals)
+            recall = float(nCorrect / nGT) if nGT else 1                    # 召回率：预测正确的个数nCorrect除以实际标签个数nGT
+            precision = float(nCorrect / nProposals)                        # 精确率：预测正确的个数nCorrect除以建议区域个数nProposals
 
             # Handle masks
             mask = Variable(mask.type(ByteTensor))
