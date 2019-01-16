@@ -218,15 +218,17 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
             if target[b, t].sum() == 0:
                 continue
             nGT += 1                                # 实际标签个数
-            # Convert to position relative to box
-            gx = target[b, t, 1] * nG
-            gy = target[b, t, 2] * nG
-            gw = target[b, t, 3] * nG
-            gh = target[b, t, 4] * nG
-            # Get grid box indices
+
+            # Convert to position relative to box   # 转换为相对于方框的位置
+            gx = target[b, t, 1] * nG               # 标签框的x * 13 ？
+            gy = target[b, t, 2] * nG               # 标签框的y * 13 ？
+            gw = target[b, t, 3] * nG               # 标签框的w * 13 ？
+            gh = target[b, t, 4] * nG               # 标签框的h * 13 ？
+
+            # Get grid box indices                  # 获取网格框索引
             gi = int(gx)
             gj = int(gy)
-            # Get shape of gt box
+            # Get shape of gt box                   # 获取gt框的形状
             gt_box = torch.FloatTensor(np.array([0, 0, gw, gh])).unsqueeze(0)
             # Get shape of anchor box
             anchor_shapes = torch.FloatTensor(np.concatenate((np.zeros((len(anchors), 2)), np.array(anchors)), 1))
