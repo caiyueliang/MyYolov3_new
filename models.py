@@ -321,8 +321,8 @@ class Darknet(nn.Module):
                 # print(module_def["type"], x.size())
             layer_outputs.append(x)
 
-        self.losses["recall"] /= 3
-        self.losses["precision"] /= 3
+        self.losses["recall"] /= 3                                      # 有3个层，所以除以3
+        self.losses["precision"] /= 3                                   # 有3个层，所以除以3
         return sum(output) if is_training else torch.cat(output, 1)
 
     def load_weights(self, weights_path):
