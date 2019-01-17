@@ -214,7 +214,7 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
     nGT = 0
     nCorrect = 0
     for b in range(nB):
-        for t in range(target.shape[1]):            # 遍历真实的每个标签（50个？有值的才继续）
+        for t in range(target.shape[1]):            # 遍历真实的每个标签（50个,有值的才继续）
             if target[b, t].sum() == 0:
                 continue
             nGT += 1                                # 实际标签个数

@@ -197,7 +197,7 @@ class YOLOLayer(nn.Module):
                 self.bce_loss = self.bce_loss.cuda()
                 self.ce_loss = self.ce_loss.cuda()
 
-            # nCorrect:正确的个数
+            # nGT:真实标签个数; nCorrect:预测正确的个数;
             nGT, nCorrect, mask, conf_mask, tx, ty, tw, th, tconf, tcls = build_targets(
                 pred_boxes=pred_boxes.cpu().data,       # (-1, 3, 13, 13, 4)
                 pred_conf=pred_conf.cpu().data,         # (-1, 3, 13, 13)
@@ -216,7 +216,7 @@ class YOLOLayer(nn.Module):
             # print('nGT', nGT)                                               # 一个batch 中，实际标签个数       18
             # print('nCorrect', nCorrect)                                     # 预测正确的个数                  17
 
-            nProposals = int((pred_conf > self.conf_thres).sum().item())    # 建议区域个数
+            nProposals = int((pred_conf > self.conf_thres).sum().item())    # 建议区域个数:置信度大于阈值的预测框的个数
             # print('nProposals', nProposals)
 
             recall = float(nCorrect / nGT) if nGT else 1                    # 召回率：预测正确的个数nCorrect除以实际标签个数nGT

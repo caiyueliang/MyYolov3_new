@@ -216,7 +216,7 @@ class ListDataset(Dataset):
         return len(self.img_files)
 
     # 随机裁剪
-    def random_crop(self, img, labels):
+    def random_crop(self, img, labels, prob=0.8):
         h, w, c = img.shape
         # print('old w, h, c', w, h, c)
         # print('old labels', labels)
@@ -248,7 +248,7 @@ class ListDataset(Dataset):
         crop_bottom = h
 
         # random crop left and top
-        if random.random() < 0.6:
+        if random.random() < prob:
             rate = random.random()
             crop = int(min_lt * rate)
 
@@ -263,7 +263,7 @@ class ListDataset(Dataset):
             # print('crop_top', crop_top, rate, y1, y2)
 
         # random crop right
-        if random.random() < 0.6:
+        if random.random() < prob:
             rate = random.random()
             crop = int(min_rb * rate)
 
@@ -345,9 +345,9 @@ class ListDataset(Dataset):
     #             return img, selected_boxes_selected, selected_labels
 
     # 随机调亮
-    def random_bright(self, im, delta=16):
+    def random_bright(self, im, delta=16, prob=0.5):
         alpha = random.random()
-        if alpha > 0.5:
+        if alpha > prob:
             im = im * alpha + random.randrange(-delta, delta)
             im = im.clip(min=0, max=255).astype(np.uint8)
         return im
