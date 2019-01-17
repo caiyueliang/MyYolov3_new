@@ -347,7 +347,7 @@ class ListDataset(Dataset):
     # 随机调亮
     def random_bright(self, im, delta=16):
         alpha = random.random()
-        if alpha > 0.3:
+        if alpha > 0.5:
             im = im * alpha + random.randrange(-delta, delta)
             im = im.clip(min=0, max=255).astype(np.uint8)
         return im
