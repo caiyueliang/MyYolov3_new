@@ -192,12 +192,12 @@ class ListDataset(Dataset):
         # Resize and normalize
         input_img = resize(img, (self.img_shape, self.img_shape, 3), mode='reflect')
 
-        show_img = input_img.copy()
-        for label in labels:
-            cv2.rectangle(show_img, (int((label[1] - label[3]/2) * self.img_shape), int((label[2] - label[4]/2) * self.img_shape)),
-                          (int((label[1] + label[3]/2) * self.img_shape), int((label[2] + label[4]/2) * self.img_shape)), (0, 255, 0))
-        cv2.imshow('image', show_img)
-        cv2.waitKey(0)
+        # show_img = input_img.copy()
+        # for label in labels:
+        #     cv2.rectangle(show_img, (int((label[1] - label[3]/2) * self.img_shape), int((label[2] - label[4]/2) * self.img_shape)),
+        #                   (int((label[1] + label[3]/2) * self.img_shape), int((label[2] + label[4]/2) * self.img_shape)), (0, 255, 0))
+        # cv2.imshow('image', show_img)
+        # cv2.waitKey(0)
 
         input_img = np.transpose(input_img, (2, 0, 1))          # Channels-first
         input_img = torch.from_numpy(input_img).float()         # As pytorch tensor
@@ -217,59 +217,72 @@ class ListDataset(Dataset):
 
     # 随机裁剪
     def random_crop(self, img, labels):
-        # print('random_crop', labels)
-        # mode = random.choice([None, 0.3, 0.5, 0.7, 0.9])
-        # random.randrange(int(0.3*short_size), short_size)
-        img_cv = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
-        # cv2.imshow('img_cv', img_cv)
+        h, w, c = img.shape
+        # print('old w, h, c', w, h, c)
+        # print('old labels', labels)
 
-        imh, imw, _ = img_cv.shape
-        # short_size = min(imw, imh)
-        # print(imh, imw, short_size)
+        # show_img = img.copy()
+        # for label in labels:
+        #     cv2.rectangle(show_img, (int((label[1] - label[3] / 2) * w), int((label[2] - label[4] / 2) * h)),
+        #                   (int((label[1] + label[3] / 2) * w), int((label[2] + label[4] / 2) * h)), (0, 255, 0))
+        # cv2.imshow('old_image', show_img)
 
-        left = min(labels[0], labels[4])
-        top = min(labels[1], labels[3])
-        min_left = min(left, top)
+        x1 = w * (labels[:, 1] - labels[:, 3] / 2)
+        y1 = h * (labels[:, 2] - labels[:, 4] / 2)
+        x2 = w * (labels[:, 1] + labels[:, 3] / 2)
+        y2 = h * (labels[:, 2] + labels[:, 4] / 2)
+        # print(x1, y1, x2, y2)
 
-        right = min(imw - labels[2], imw - labels[6])
-        bottom = min(imh - labels[5], imh - labels[7])
-        min_right = min(right, bottom)
+        min_left = min(min(x1), min(x2))
+        min_top = min(min(y1), min(y2))
+        min_lt = min(min_left, min_top)
 
-        # print('left, top, right, bottom', left, top, right, bottom)
-        # print('min_left, min_right', min_left, min_right)
+        min_right = w - max(max(x1), max(x2))
+        min_bottom = h - max(max(y1), max(y2))
+        min_rb = min(min_right, min_bottom)
+        # print('min_left, min_top, min_right, min_bottom', min_left, min_top, min_right, min_bottom)
 
-        x1 = 0
-        y1 = 0
-        x2 = imw
-        y2 = imh
+        crop_left = 0
+        crop_top = 0
+        crop_right = w
+        crop_bottom = h
 
-        if random.random() < 0.5:
+        # random crop left and top
+        if random.random() < 0.6:
             rate = random.random()
-            crop = int(min_left * rate)
-            x1 = crop
-            labels[0] = labels[0] - crop
-            labels[2] = labels[2] - crop
-            labels[4] = labels[4] - crop
-            labels[6] = labels[6] - crop
+            crop = int(min_lt * rate)
 
-            y1 = crop
-            labels[1] = labels[1] - crop
-            labels[3] = labels[3] - crop
-            labels[5] = labels[5] - crop
-            labels[7] = labels[7] - crop
+            x1 = x1 - crop
+            x2 = x2 - crop
+            crop_left = crop
+            # print('crop_left', crop_left, rate, x1, x2)
 
-        if random.random() < 0.5:
+            y1 = y1 - crop
+            y2 = y2 - crop
+            crop_top = crop
+            # print('crop_top', crop_top, rate, y1, y2)
+
+        # random crop right
+        if random.random() < 0.6:
             rate = random.random()
-            crop = int(min_right * rate)
-            x2 = imw - crop
-            y2 = imh - crop
+            crop = int(min_rb * rate)
 
-        # print('x1, y1, x2, y2', x1, y1, x2, y2)
-        img_cv = img_cv[y1:y2, x1:x2]
-        # cv2.imshow('crop_img_cv', img_cv)
-        # cv2.waitKey(0)
+            crop_right = crop_right - crop
+            # print('crop_right', crop_right, rate)
 
-        img = Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
+            crop_bottom = crop_bottom - crop
+            # print('crop_bottom', crop_bottom, rate)
+
+        img = img[crop_top:crop_bottom, crop_left:crop_right]
+        h, w, c = img.shape
+        # print('new w, h, c', w, h, c)
+
+        labels[:, 1] = ((x1 + x2) / 2) / float(w)                # 第1列表示：x轴中心点（比例） # 第0列表示：类别
+        labels[:, 2] = ((y1 + y2) / 2) / float(h)                # 第2列表示：y轴中心点（比例）
+        labels[:, 3] = (x2 - x1) / float(w)                      # 第3列表示：w（比例）
+        labels[:, 4] = (y2 - y1) / float(h)                      # 第4列表示：h（比例）
+        # print('new labels', labels)
+
         return img, labels
 
     # # 随机裁剪
@@ -341,5 +354,7 @@ class ListDataset(Dataset):
 
 
 if __name__ == "__main__":
-    torch.utils.data.DataLoader(ListDataset("../Data/yolo/yolo_data_new/car_detect_train", "image_path.txt", train=True),
+    train_loader = torch.utils.data.DataLoader(ListDataset("../../Data/yolo/yolo_data_new/car_detect_train", "image_path.txt", train=True),
                                 shuffle=False, batch_size=4, num_workers=0)
+    for batch_i, (_, imgs, targets) in enumerate(train_loader):
+        print(batch_i)
