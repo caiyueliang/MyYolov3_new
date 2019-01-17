@@ -124,9 +124,27 @@ def data_pre_process_1(root_path, old_label_file, class_index):
     return
 
 
+def update_image_path(root_path, label_file):
+    write_data(os.path.join(root_path, label_file), "", "w+")
+
+    total_dir = list()
+    for root, dirs, files in os.walk(root_path):
+        for dir in dirs:
+            total_dir.append(dir)
+
+    for dir in total_dir:
+        print(dir)
+        for root, dirs, files in os.walk(os.path.join(root_path, dir)):
+            for file in files:
+                if '.jpg' in file or '.jpeg' in file or '.png' in file:
+                    print(file)
+                    write_data(os.path.join(root_path, label_file), dir + os.sep + file + '\n', "a+")
+
+
 def yolo_to_facebox(root_path, old_label_file, new_label_file):
     old_label_path = os.path.join(root_path, old_label_file)
     new_label_path = os.path.join(root_path, new_label_file)
+    write_data(new_label_path, '', 'w+')
 
     with open(old_label_path, 'r') as file:
         label_list = file.readlines()
@@ -169,5 +187,8 @@ if __name__ == '__main__':
     # data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_test/', 'car_loc_label.txt', "1")
 
     # yolo数据转成Faceboxes数据
+    update_image_path('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt')
+    update_image_path('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt')
+
     yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'faceboxes_label.txt')
     yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'faceboxes_label.txt')
