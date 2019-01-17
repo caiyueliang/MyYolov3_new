@@ -201,7 +201,7 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
     nB = target.size(0)                                     # batch size： -1
     nA = num_anchors                                        # 3
     nC = num_classes                                        # 2
-    nG = grid_size                                          # 13
+    nG = grid_size                                          # 13,步长？
     mask = torch.zeros(nB, nA, nG, nG)                      # (-1, 3, 13, 13)
     conf_mask = torch.ones(nB, nA, nG, nG)                  # (-1, 3, 13, 13)
     tx = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
@@ -220,10 +220,11 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
             nGT += 1                                # 实际标签个数
 
             # Convert to position relative to box   # 转换为相对于方框的位置
-            gx = target[b, t, 1] * nG               # 标签框的x * 13 ？
-            gy = target[b, t, 2] * nG               # 标签框的y * 13 ？
-            gw = target[b, t, 3] * nG               # 标签框的w * 13 ？
-            gh = target[b, t, 4] * nG               # 标签框的h * 13 ？
+            gx = target[b, t, 1] * nG               # 标签框的x * 13,步长 ？
+            gy = target[b, t, 2] * nG               # 标签框的y * 13,步长 ？
+            gw = target[b, t, 3] * nG               # 标签框的w * 13,步长 ？  TODO
+            gh = target[b, t, 4] * nG               # 标签框的h * 13,步长 ？
+            print('gw', gw.size(), gw)
 
             # Get grid box indices                  # 获取网格框索引
             gi = int(gx)
@@ -232,19 +233,21 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
             gt_box = torch.FloatTensor(np.array([0, 0, gw, gh])).unsqueeze(0)
             # Get shape of anchor box
             anchor_shapes = torch.FloatTensor(np.concatenate((np.zeros((len(anchors), 2)), np.array(anchors)), 1))
+            print('anchor_shapes', anchor_shapes.size(), anchor_shapes)
+
             # Calculate iou between gt and anchor shapes
-            anch_ious = bbox_iou(gt_box, anchor_shapes)
+            anch_ious = bbox_iou(gt_box, anchor_shapes)                             # 计算gt框和锚框的iou值
             # Where the overlap is larger than threshold set mask to zero (ignore)
-            conf_mask[b, anch_ious > ignore_thres, gj, gi] = 0
+            conf_mask[b, anch_ious > ignore_thres, gj, gi] = 0                      # 如果重叠大于阈值，则将mask设置为零（忽略）
             # Find the best matching anchor box
-            best_n = np.argmax(anch_ious)
+            best_n = np.argmax(anch_ious)                                           # iou值最大的锚框标记为最好的预测锚框best_n
             # Get ground truth box
             gt_box = torch.FloatTensor(np.array([gx, gy, gw, gh])).unsqueeze(0)     # 真实标签框
             # Get the best prediction
             pred_box = pred_boxes[b, best_n, gj, gi].unsqueeze(0)                   # 最好的预测框
             # Masks
-            mask[b, best_n, gj, gi] = 1
-            conf_mask[b, best_n, gj, gi] = 1
+            mask[b, best_n, gj, gi] = 1                                             # 最好的预测锚框best_n对应的mask设置为1
+            conf_mask[b, best_n, gj, gi] = 1                                        # 最好的预测锚框best_n对应的conf_mask设置为1
             # Coordinates
             tx[b, best_n, gj, gi] = gx - gi
             ty[b, best_n, gj, gi] = gy - gj
