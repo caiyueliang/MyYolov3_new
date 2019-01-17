@@ -166,14 +166,19 @@ class ListDataset(Dataset):
     #     return img_path, input_img, filled_labels
 
     def __getitem__(self, index):
-        # ---------
+        # ==============================================================================================
+        #  Label
+        label_path = self.label_files[index % len(self.img_files)].rstrip()
+
+        labels = None
+        if os.path.exists(label_path):
+            labels = np.loadtxt(label_path).reshape(-1, 5)
+
+        # ==============================================================================================
         #  Image
-        # ---------
         img_path = self.img_files[index % len(self.img_files)].rstrip()
         img = np.array(Image.open(img_path))
-        # print(img_path)
 
-        # Handles images with less than three channels
         while len(img.shape) != 3:
             index += 1
             img_path = self.img_files[index % len(self.img_files)].rstrip()
@@ -183,42 +188,28 @@ class ListDataset(Dataset):
         input_img = resize(img, (self.img_shape, self.img_shape, 3), mode='reflect')
         # show_img = input_img.copy()
 
-        # Channels-first
-        input_img = np.transpose(input_img, (2, 0, 1))
-        # As pytorch tensor
-        input_img = torch.from_numpy(input_img).float()
+        # 图片增广
+        if self.train:
+            img, boxes, labels = self.random_crop(img, labels)  # 随机裁剪
+            img = self.random_bright(img)  # 随机调亮
 
-        # ---------
-        #  Label
-        # ---------
-        label_path = self.label_files[index % len(self.img_files)].rstrip()
+        # for label in labels:
+        #     cv2.rectangle(show_img, (int((label[1] - label[3]/2) * self.img_shape), int((label[2] - label[4]/2) * self.img_shape)),
+        #                   (int((label[1] + label[3]/2) * self.img_shape), int((label[2] + label[4]/2) * self.img_shape)), (0, 255, 0))
+        # cv2.imshow('image', show_img)
+        # cv2.waitKey(0)
 
-        labels = None
-        if os.path.exists(label_path):
-            labels = np.loadtxt(label_path).reshape(-1, 5)
+        input_img = np.transpose(input_img, (2, 0, 1))          # Channels-first
+        input_img = torch.from_numpy(input_img).float()         # As pytorch tensor
 
-            # for label in labels:
-            #     cv2.rectangle(show_img, (int((label[1] - label[3]/2) * self.img_shape), int((label[2] - label[4]/2) * self.img_shape)),
-            #                   (int((label[1] + label[3]/2) * self.img_shape), int((label[2] + label[4]/2) * self.img_shape)), (0, 255, 0))
-            # cv2.imshow('image', show_img)
-            # cv2.waitKey(0)
-
-        # # 图片增广
-        # if self.train:
-        #     img, boxes, labels = self.random_crop(img, boxes, labels)  # 随机裁剪
-        #     img = self.random_bright(img)  # 随机调亮
-
+        # ==============================================================================================
         # Fill matrix
+        # filled_labels size (50, 5);每一行表示一个标签（最多50个），分别表示：类别，x轴中心点，y轴中心点，w，h
         filled_labels = np.zeros((self.max_objects, 5))
         if labels is not None:
             filled_labels[range(len(labels))[:self.max_objects]] = labels[:self.max_objects]
         filled_labels = torch.from_numpy(filled_labels)
 
-        # print(img_path)
-        # print(input_img)
-        # print(filled_labels)
-
-        # filled_labels size (50, 5);每一行表示一个标签（最多50个），分别表示：类别，x轴中心点，y轴中心点，w，h
         return img_path, input_img, filled_labels
 
     def __len__(self):
