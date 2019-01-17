@@ -104,7 +104,7 @@ class ModuleTrain:
         self.tensor = torch.cuda.FloatTensor if self.cuda else torch.FloatTensor
 
         # Get dataloader
-        self.train_loader = torch.utils.data.DataLoader(ListDataset(self.train_path, self.image_file, train=False), shuffle=True,
+        self.train_loader = torch.utils.data.DataLoader(ListDataset(self.train_path, self.image_file, train=True), shuffle=True,
                                                         batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
         self.test_loader = torch.utils.data.DataLoader(ListDataset(self.test_path, self.image_file), shuffle=False,
                                                        batch_size=self.opt.batch_size, num_workers=self.opt.n_cpu)
