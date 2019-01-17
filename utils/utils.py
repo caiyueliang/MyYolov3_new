@@ -219,21 +219,25 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
                 continue
             nGT += 1                                # 实际标签个数
 
-            # Convert to position relative to box   # 转换为相对于方框的位置
-            gx = target[b, t, 1] * nG               # 标签框的x * 13,步长 ？
-            gy = target[b, t, 2] * nG               # 标签框的y * 13,步长 ？
-            gw = target[b, t, 3] * nG               # 标签框的w * 13,步长 ？  TODO
-            gh = target[b, t, 4] * nG               # 标签框的h * 13,步长 ？
-            print('gw', gw.size(), gw)
+            # Convert to position relative to box   # 真实标签框转换为相对于方框的位置
+            gx = target[b, t, 1] * nG               # 真实标签框的x * 13,步长 ？
+            gy = target[b, t, 2] * nG               # 真实标签框的y * 13,步长 ？
+            gw = target[b, t, 3] * nG               # 真实标签框的w * 13,步长 ？  TODO
+            gh = target[b, t, 4] * nG               # 真实标签框的h * 13,步长 ？
+            # print('gx', gx.size(), gx)            # 3.4881|6.7398
+            # print('gy', gh.size(), gy)            # 3.7652|6.7463
+            # print('gw', gw.size(), gw)            # 0.5290|1.1356
+            # print('gh', gh.size(), gh)            # 0.5314|1.0758
 
-            # Get grid box indices                  # 获取网格框索引
-            gi = int(gx)
-            gj = int(gy)
+            # Get grid box indices                  # 获取网格框索引（绑定具体某个网格）
+            gi = int(gx)                            # 绑定具体某个网格
+            gj = int(gy)                            # 绑定具体某个网格
+
             # Get shape of gt box                   # 获取gt框的形状
             gt_box = torch.FloatTensor(np.array([0, 0, gw, gh])).unsqueeze(0)
             # Get shape of anchor box
             anchor_shapes = torch.FloatTensor(np.concatenate((np.zeros((len(anchors), 2)), np.array(anchors)), 1))
-            print('anchor_shapes', anchor_shapes.size(), anchor_shapes)
+            # print('anchor_shapes', anchor_shapes.size(), anchor_shapes)           # size (3, 4)
 
             # Calculate iou between gt and anchor shapes
             anch_ious = bbox_iou(gt_box, anchor_shapes)                             # 计算gt框和锚框的iou值

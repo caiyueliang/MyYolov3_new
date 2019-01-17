@@ -22,9 +22,9 @@ import torch.optim as optim
 
 def parse_argvs():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
+    parser.add_argument("--epochs", type=int, default=100, help="number of epochs")
     parser.add_argument("--decay_epoch", type=int, default=60, help="decay_epoch")
-    parser.add_argument("--lr", type=float, default=0.001, help="lr")
+    parser.add_argument("--lr", type=float, default=0.0001, help="lr")
 
     parser.add_argument("--batch_size", type=int, default=8, help="size of each image batch")
 
