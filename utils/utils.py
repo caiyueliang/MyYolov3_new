@@ -202,8 +202,11 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
     nA = num_anchors                                        # 3
     nC = num_classes                                        # 2
     nG = grid_size                                          # 13,步长？
-    mask = torch.zeros(nB, nA, nG, nG)                      # (-1, 3, 13, 13)
-    conf_mask = torch.ones(nB, nA, nG, nG)                  # (-1, 3, 13, 13)
+
+    # mask和conf_mask相反的东西？一个表示是背景，一个表示是目标？
+    mask = torch.zeros(nB, nA, nG, nG)                      # (-1, 3, 13, 13)       mask全为0,预测对的目标为1，用来预测目标
+    conf_mask = torch.ones(nB, nA, nG, nG)                  # (-1, 3, 13, 13)       conf_mask全为1,预测对的目标为1(后面会减掉)，以及与锚框IOU重叠度小的值为0，预测背景
+
     tx = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
     ty = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
     tw = torch.zeros(nB, nA, nG, nG)                        # (-1, 3, 13, 13)
@@ -235,14 +238,18 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
 
             # Get shape of gt box                   # 获取gt框的形状
             gt_box = torch.FloatTensor(np.array([0, 0, gw, gh])).unsqueeze(0)
+            # print('gt_box', gt_box.size(), gt_box)                                # (1, 4), tensor([[ 0.0000,  0.0000,  1.4098,  0.7390]])
             # Get shape of anchor box
             anchor_shapes = torch.FloatTensor(np.concatenate((np.zeros((len(anchors), 2)), np.array(anchors)), 1))
             # print('anchor_shapes', anchor_shapes.size(), anchor_shapes)           # size (3, 4)
 
             # Calculate iou between gt and anchor shapes
             anch_ious = bbox_iou(gt_box, anchor_shapes)                             # 计算gt框和锚框的iou值
+            # print('anch_ious', anch_ious.size(), anch_ious)                       # (3,), tensor([ 0.2281,  0.0875,  0.0223]))
             # Where the overlap is larger than threshold set mask to zero (ignore)
-            conf_mask[b, anch_ious > ignore_thres, gj, gi] = 0                      # 如果重叠大于阈值，则将mask设置为零（忽略）
+            conf_mask[b, anch_ious > ignore_thres, gj, gi] = 0                      # 如果重叠大于阈值，则将mask设置为零（忽略）,后面只让最好的一个框来预测？
+            # print('conf_mask', conf_mask.size(), conf_mask)                       # (-1, 3, 13, 13)， 大都是 1 ？？？？ TODO
+
             # Find the best matching anchor box
             best_n = np.argmax(anch_ious)                                           # iou值最大的锚框标记为最好的预测锚框best_n
             # Get ground truth box
@@ -250,8 +257,8 @@ def build_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors,
             # Get the best prediction
             pred_box = pred_boxes[b, best_n, gj, gi].unsqueeze(0)                   # 最好的预测框
             # Masks
-            mask[b, best_n, gj, gi] = 1                                             # 最好的预测锚框best_n对应的mask设置为1
-            conf_mask[b, best_n, gj, gi] = 1                                        # 最好的预测锚框best_n对应的conf_mask设置为1
+            mask[b, best_n, gj, gi] = 1                                             # mask全为0,预测对的目标为1，用来预测目标
+            conf_mask[b, best_n, gj, gi] = 1                                        # conf_mask全为1,预测对的目标为1(后面会减掉)，以及与锚框IOU重叠度小的值为0，预测背景
             # Coordinates
             tx[b, best_n, gj, gi] = gx - gi
             ty[b, best_n, gj, gi] = gy - gj

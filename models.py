@@ -197,7 +197,9 @@ class YOLOLayer(nn.Module):
                 self.bce_loss = self.bce_loss.cuda()
                 self.ce_loss = self.ce_loss.cuda()
 
-            # nGT:真实标签个数; nCorrect:预测正确的个数;
+            # nGT:真实标签个数; nCorrect:预测正确的个数
+            # mask全为0,预测对的目标为1，用来预测目标
+            # conf_mask全为1,预测对的目标为1？，以及与锚框IOU重叠度小的值为0？预测背景？
             nGT, nCorrect, mask, conf_mask, tx, ty, tw, th, tconf, tcls = build_targets(
                 pred_boxes=pred_boxes.cpu().data,       # (-1, 3, 13, 13, 4)
                 pred_conf=pred_conf.cpu().data,         # (-1, 3, 13, 13)
@@ -235,8 +237,8 @@ class YOLOLayer(nn.Module):
             tcls = Variable(tcls.type(LongTensor), requires_grad=False)
 
             # Get conf mask where gt and where there is no gt
-            conf_mask_true = mask
-            conf_mask_false = conf_mask - mask
+            conf_mask_true = mask                           # mask全为0,预测对的目标为1，用来预测目标
+            conf_mask_false = conf_mask - mask              # conf_mask全为1,以及与锚框IOU重叠度小的值为0，预测背景
 
             # Mask outputs to ignore non-existing objects
             # x, y, w, h 用MSELoss, conf 用BCELoss, 类别用CrossEntropyLoss
