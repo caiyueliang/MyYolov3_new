@@ -122,14 +122,14 @@ for img_i, (path, detections) in enumerate(zip(imgs_paths, img_detections)):
     fig, ax = plt.subplots(1)
     ax.imshow(img)
 
-    # The amount of padding that was added
-    pad_x = max(img.shape[0] - img.shape[1], 0) * (opt.img_size / max(img.shape))
-    pad_y = max(img.shape[1] - img.shape[0], 0) * (opt.img_size / max(img.shape))
-    # Image height and width after padding is removed
-    unpad_h = opt.img_size - pad_y
-    unpad_w = opt.img_size - pad_x
-    print('unpad_h', unpad_h)
-    print('unpad_w', unpad_w)
+    # # The amount of padding that was added
+    # pad_x = max(img.shape[0] - img.shape[1], 0) * (opt.img_size / max(img.shape))
+    # pad_y = max(img.shape[1] - img.shape[0], 0) * (opt.img_size / max(img.shape))
+    # # Image height and width after padding is removed
+    # unpad_h = opt.img_size - pad_y
+    # unpad_w = opt.img_size - pad_x
+    # print('unpad_h', unpad_h)
+    # print('unpad_w', unpad_w)
 
     # Draw bounding boxes and labels of detections
     if detections is not None:
@@ -143,8 +143,8 @@ for img_i, (path, detections) in enumerate(zip(imgs_paths, img_detections)):
             # Rescale coordinates to original dimensions
             box_h = (y2 - y1)
             box_w = (x2 - x1)
-            y1 = (y1 - pad_y // 2)
-            x1 = (x1 - pad_x // 2)
+            # y1 = (y1 - pad_y // 2)
+            # x1 = (x1 - pad_x // 2)
             # box_h = ((y2 - y1) / unpad_h) * img.shape[0]
             # box_w = ((x2 - x1) / unpad_w) * img.shape[1]
             # y1 = ((y1 - pad_y // 2) / unpad_h) * img.shape[0]
