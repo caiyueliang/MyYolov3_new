@@ -220,7 +220,7 @@ class YOLOLayer(nn.Module):
             # print('nProposals', nProposals)
 
             recall = float(nCorrect / nGT) if nGT else 1                    # 召回率：预测正确的个数nCorrect除以实际标签个数nGT
-            precision = float(nCorrect / nProposals)                        # 精确率：预测正确的个数nCorrect除以建议区域个数nProposals
+            precision = float(nCorrect / nProposals) if nProposals else 0   # 精确率：预测正确的个数nCorrect除以建议区域个数nProposals
 
             # Handle masks
             mask = Variable(mask.type(ByteTensor))
