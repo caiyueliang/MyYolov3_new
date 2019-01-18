@@ -141,7 +141,7 @@ def update_image_path(root_path, label_file):
                     write_data(os.path.join(root_path, label_file), dir + os.sep + file + '\n', "a+")
 
 
-def yolo_to_facebox(root_path, old_label_file, new_label_file):
+def yolo_to_facebox(root_path, old_label_file, new_label_file, filter_label):
     old_label_path = os.path.join(root_path, old_label_file)
     new_label_path = os.path.join(root_path, new_label_file)
     write_data(new_label_path, '', 'w+')
@@ -162,16 +162,22 @@ def yolo_to_facebox(root_path, old_label_file, new_label_file):
         with open(os.path.join(root_path, label_path), 'a+') as file:
             label_all = file.readlines()
 
-        save_str = image_path + " " + str(len(label_all)) + " "
+        save_str = ""
+        useful_label_num = 0
         for loc_str in label_all:
             print('loc_str', loc_str)
             loc_list = loc_str.rstrip().split(' ')
             print('loc_list', loc_list)
-            save_str += str((float(loc_list[1]) * w) - (float(loc_list[3]) * w) / 2) + " "
-            save_str += str((float(loc_list[2]) * h) - (float(loc_list[4]) * h) / 2) + " "
-            save_str += str(float(loc_list[3]) * w) + " "
-            save_str += str(float(loc_list[4]) * h) + " "
-            save_str += str(int(loc_list[0]) + 1) + " "
+
+            if (int(loc_list[0]) + 1) in filter_label:
+                save_str += str((float(loc_list[1]) * w) - (float(loc_list[3]) * w) / 2) + " "
+                save_str += str((float(loc_list[2]) * h) - (float(loc_list[4]) * h) / 2) + " "
+                save_str += str(float(loc_list[3]) * w) + " "
+                save_str += str(float(loc_list[4]) * h) + " "
+                save_str += str(int(loc_list[0]) + 1) + " "
+                useful_label_num += 1
+
+        save_str = image_path + " " + str(useful_label_num) + " " + save_str
 
         write_data(new_label_path, save_str + '\n', 'a+')
 
@@ -190,5 +196,8 @@ if __name__ == '__main__':
     update_image_path('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt')
     update_image_path('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt')
 
-    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'faceboxes_label.txt')
-    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'faceboxes_label.txt')
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'faceboxes_label.txt', [1, 2])
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'faceboxes_label.txt', [1, 2])
+
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'label.txt', [1])
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'label.txt', [1])
