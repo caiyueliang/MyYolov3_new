@@ -192,12 +192,16 @@ if __name__ == '__main__':
     # data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_train/', 'car_loc_label.txt', "1")
     # data_pre_process_1('../../Data/yolo/yolo_data_new/car_detect_test/', 'car_loc_label.txt', "1")
 
-    # yolo数据转成Faceboxes数据
+    # 更新所有的image信息，保存在image_path.txt
     update_image_path('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt')
     update_image_path('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt')
 
+    # yolo数据转成Faceboxes数据
     yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'faceboxes_label.txt', [1, 2])
     yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'faceboxes_label.txt', [1, 2])
 
-    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'label.txt', [1])
-    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'label.txt', [1])
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'plate_label.txt', [1])
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'plate_label.txt', [1])
+
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_train/', 'image_path.txt', 'car_label.txt', [2])
+    yolo_to_facebox('../../Data/yolo/yolo_data_new/car_detect_test/', 'image_path.txt', 'car_label.txt', [2])
