@@ -353,6 +353,15 @@ class SignLabel:
                     print('======================================================')
                     print('[next] ...')
                     break
+                if k == ord('d'):
+                    print('======================================================')
+                    print('[delete] image and label ...')
+                    if os.path.exists(image_file):
+                        os.remove(image_file)
+                    if os.path.exists(label_file):
+                        os.remove(label_file)
+
+                    break
 
                 # 删除标记框
                 if k == ord('!'):
@@ -416,7 +425,9 @@ if __name__ == '__main__':
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_1/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_2/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_3/", process_all=True)
-    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_4/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_4/", process_all=True)
+    # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_5/", process_all=False)
+    sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/failed_6/", process_all=False)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/ketuo_1/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/other_1/", process_all=True)
     # sign_label.sign_images(root_path="../Data/yolo/yolo_data_new/car_detect_train/szlg_1/", process_all=True)
