@@ -177,9 +177,9 @@ def yolo_to_facebox(root_path, old_label_file, new_label_file, filter_label):
                 save_str += str(int(loc_list[0]) + 1) + " "
                 useful_label_num += 1
 
-        save_str = image_path + " " + str(useful_label_num) + " " + save_str
-
-        write_data(new_label_path, save_str + '\n', 'a+')
+        if save_str != "":
+            save_str = image_path + " " + str(useful_label_num) + " " + save_str
+            write_data(new_label_path, save_str + '\n', 'a+')
 
 
 if __name__ == '__main__':
