@@ -174,7 +174,11 @@ def yolo_to_facebox(root_path, old_label_file, new_label_file, filter_label):
                 save_str += str((float(loc_list[2]) * h) - (float(loc_list[4]) * h) / 2) + " "
                 save_str += str(float(loc_list[3]) * w) + " "
                 save_str += str(float(loc_list[4]) * h) + " "
-                save_str += str(int(loc_list[0]) + 1) + " "
+
+                if len(filter_label) == 1:
+                    save_str += "1 "
+                else:
+                    save_str += str(int(loc_list[0]) + 1) + " "
                 useful_label_num += 1
 
         if save_str != "":
